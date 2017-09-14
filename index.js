@@ -86,7 +86,9 @@ module.exports = (userOptions = {}) => {
     util.onClose(() => {
       log(`close ${filePath}`)
       delete bundles[filePath]
-      bundler.close()
+      if (options.shouldWatch) {
+        bundler.close()
+      }
     })
 
     return bundlePromise

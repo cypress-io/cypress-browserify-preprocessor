@@ -192,10 +192,18 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('closes bundler when onClose callback is called', function () {
+      it('closes bundler when shouldWatch is true and onClose callback is called', function () {
+        this.options.shouldWatch = true
         return this.run().then(() => {
           this.util.onClose.lastCall.args[0]()
           expect(this.bundlerApi.close).to.be.called
+        })
+      })
+
+      it('does not close bundler when shouldWatch is false and onClose callback is called', function () {
+        return this.run().then(() => {
+          this.util.onClose.lastCall.args[0]()
+          expect(this.bundlerApi.close).not.to.be.called
         })
       })
     })
