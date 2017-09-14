@@ -1,5 +1,5 @@
 {
-  "name": "cypress-browserify-preprocessor",
+  "name": "@cypress/browserify-preprocessor",
   "description": "Cypress preprocessor for bundling JavaScript via browserify",
   "version": "0.0.0-development",
   "author": "Chris Breiding <chrisbreiding@gmail.com>",
