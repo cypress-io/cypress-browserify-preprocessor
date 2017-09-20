@@ -34,14 +34,19 @@ module.exports = (userOptions = {}) => {
 
     if (options.shouldWatch) {
       log('watching')
-      bundler.plugin(watchify, {
-        ignoreWatch: userOptions.ignoreWatch || undefined,
-      })
+      bundler.plugin(watchify, userOptions.watchifyOptions || {})
     }
 
     const onBundle = userOptions.onBundle
     if (typeof onBundle === 'function') {
       onBundle(bundler)
+    }
+
+    const transforms = userOptions.transforms
+    if (Object.prototype.toString.call(transforms) === '[object Array]') {
+      transforms.forEach((transform) => {
+        bundler.transform(transform.transform, transform.options)
+      })
     }
 
     const bundle = () => {

@@ -29,11 +29,11 @@ describe('browserify preprocessor', function () {
 
     const bundlerApi = this.bundlerApi = {
       bundle: sandbox.stub().returns(streamApi),
-      transform () { return bundlerApi },
       external () { return bundlerApi },
       close: sandbox.spy(),
       plugin: sandbox.stub(),
     }
+    bundlerApi.transform = sandbox.stub().returns(bundlerApi)
     bundlerApi.on = sandbox.stub().returns(bundlerApi)
 
     browserify.returns(bundlerApi)
@@ -122,9 +122,9 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('includes ignoreWatch option if provided', function () {
+      it('includes watchifyOptions if provided', function () {
         this.options.shouldWatch = true
-        this.userOptions.ignoreWatch = ['node_modules']
+        this.userOptions.watchifyOptions = { ignoreWatch: ['node_modules'] }
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
             ignoreWatch: ['node_modules'],
@@ -143,6 +143,15 @@ describe('browserify preprocessor', function () {
         this.userOptions.onBundle = sandbox.spy()
         return this.run().then(() => {
           expect(this.userOptions.onBundle).to.be.calledWith(this.bundlerApi)
+        })
+      })
+
+      it('applies transforms provided', function () {
+        const transform = () => {}
+        const options = {}
+        this.userOptions.transforms = [{ transform, options }]
+        return this.run().then(() => {
+          expect(this.bundlerApi.transform).to.be.calledWith(transform, options)
         })
       })
 
