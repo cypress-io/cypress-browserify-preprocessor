@@ -11,15 +11,16 @@ const log = require('debug')('cypress:browserify')
 
 const bundles = {}
 
-module.exports = (userOptions = {}) => {
+module.exports = (config, userOptions = {}) => {
   log('received user options', userOptions)
 
-  return (filePath, options, util) => {
+  return (filePath, util) => {
     if (bundles[filePath]) {
       log(`already have bundle for ${filePath}`)
       return bundles[filePath]
     }
 
+    const shouldWatch = !config.isTextTerminal
     const outputPath = util.getOutputPath(filePath)
 
     log(`input: ${filePath}`)
@@ -32,7 +33,7 @@ module.exports = (userOptions = {}) => {
       packageCache: {},
     })
 
-    if (options.shouldWatch) {
+    if (shouldWatch) {
       log('watching')
       bundler.plugin(watchify, userOptions.watchifyOptions || {})
     }
@@ -91,7 +92,7 @@ module.exports = (userOptions = {}) => {
     util.onClose(() => {
       log(`close ${filePath}`)
       delete bundles[filePath]
-      if (options.shouldWatch) {
+      if (shouldWatch) {
         bundler.close()
       }
     })

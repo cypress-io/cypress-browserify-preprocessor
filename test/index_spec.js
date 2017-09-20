@@ -45,10 +45,10 @@ describe('browserify preprocessor', function () {
 
     sandbox.stub(fs, 'ensureDirAsync').resolves()
 
+    this.config = {}
     this.userOptions = {}
     this.filePath = 'path/to/file.js'
     this.outputPath = 'output/output.js'
-    this.options = {}
     this.util = {
       getOutputPath: sandbox.stub().returns(this.outputPath),
       fileUpdated: sandbox.spy(),
@@ -56,7 +56,7 @@ describe('browserify preprocessor', function () {
     }
 
     this.run = () => {
-      return preprocessor(this.userOptions)(this.filePath, this.options, this.util)
+      return preprocessor(this.config, this.userOptions)(this.filePath, this.util)
     }
   })
 
@@ -87,9 +87,9 @@ describe('browserify preprocessor', function () {
         browserify.returns(this.bundlerApi)
 
         const run = preprocessor(this.userOptions)
-        return run(this.filePath, this.options, this.util)
+        return run(this.filePath, this.util)
         .then(() => {
-          return run(this.filePath, this.options, this.util)
+          return run(this.filePath, this.util)
         })
         .then(() => {
           expect(browserify).to.be.calledOnce
@@ -115,15 +115,15 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('watches when shouldWatch is true', function () {
-        this.options.shouldWatch = true
+      it('watches when isTextTerminal is false', function () {
+        this.config.isTextTerminal = false
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify)
         })
       })
 
       it('includes watchifyOptions if provided', function () {
-        this.options.shouldWatch = true
+        this.config.isTextTerminal = false
         this.userOptions.watchifyOptions = { ignoreWatch: ['node_modules'] }
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
@@ -132,8 +132,8 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('does not watch when shouldWatch is false', function () {
-        this.options.shouldWatch = false
+      it('does not watch when isTextTerminal is true', function () {
+        this.config.isTextTerminal = true
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).not.to.be.called
         })
@@ -201,15 +201,16 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('closes bundler when shouldWatch is true and onClose callback is called', function () {
-        this.options.shouldWatch = true
+      it('closes bundler when isTextTerminal is false and onClose callback is called', function () {
+        this.config.isTextTerminal = false
         return this.run().then(() => {
           this.util.onClose.lastCall.args[0]()
           expect(this.bundlerApi.close).to.be.called
         })
       })
 
-      it('does not close bundler when shouldWatch is false and onClose callback is called', function () {
+      it('does not close bundler when isTextTerminal is true and onClose callback is called', function () {
+        this.config.isTextTerminal = true
         return this.run().then(() => {
           this.util.onClose.lastCall.args[0]()
           expect(this.bundlerApi.close).not.to.be.called
