@@ -66,6 +66,10 @@ describe('browserify preprocessor', function () {
     it('receives user options and returns a preprocessor function', function () {
       expect(preprocessor(this.config, this.userOptions)).to.be.a('function')
     })
+
+    it('throws error if config is not the first argument', function () {
+      expect(preprocessor).to.throw('must be called with the Cypress config')
+    })
   })
 
   describe('preprocessor function', function () {
