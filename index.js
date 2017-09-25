@@ -11,10 +11,41 @@ const log = require('debug')('cypress:browserify')
 
 const bundles = {}
 
+const defaults = {
+  extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
+  watchOptions: {
+    ignoreWatch: [
+      '**/.git/**',
+      '**/.nyc_output/**',
+      '**/.sass-cache/**',
+      '**/bower_components/**',
+      '**/coverage/**',
+      '**/node_modules/**',
+    ],
+  },
+  transforms: [
+    {
+      transform: require.resolve('./cjsxify'),
+      options: {},
+    },
+    {
+      transform: require.resolve('babelify'),
+      options: {
+        ast: false,
+        babelrc: false,
+        plugins: ['babel-plugin-add-module-exports'].map(require.resolve),
+        presets: ['babel-preset-env', 'babel-preset-react'].map(require.resolve),
+      },
+    },
+  ],
+}
+
 module.exports = (config, userOptions = {}) => {
   log('received user options', userOptions)
 
   return (filePath, util) => {
+    log('get', filePath)
+
     if (bundles[filePath]) {
       log(`already have bundle for ${filePath}`)
       return bundles[filePath]
@@ -28,22 +59,22 @@ module.exports = (config, userOptions = {}) => {
 
     const bundler = browserify({
       entries: [filePath],
-      extensions: userOptions.extensions || ['.js'],
+      extensions: options.extensions,
       cache: {},
       packageCache: {},
     })
 
     if (shouldWatch) {
       log('watching')
-      bundler.plugin(watchify, userOptions.watchifyOptions || {})
+      bundler.plugin(watchify, options.watchOptions || {})
     }
 
-    const onBundle = userOptions.onBundle
+    const onBundle = options.onBundle
     if (typeof onBundle === 'function') {
       onBundle(bundler)
     }
 
-    const transforms = userOptions.transforms
+    const transforms = options.transforms
     if (Object.prototype.toString.call(transforms) === '[object Array]') {
       transforms.forEach((transform) => {
         bundler.transform(transform.transform, transform.options)

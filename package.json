@@ -69,8 +69,13 @@
     "sinon-chai": "2.13.0"
   },
   "dependencies": {
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-react": "^6.24.1",
+    "babelify": "^7.3.0",
     "bluebird": "3.5.0",
     "browserify": "14.4.0",
+    "cjsxify": "^0.3.0",
     "debug": "3.0.1",
     "fs-extra": "4.0.1",
     "watchify": "3.9.0"

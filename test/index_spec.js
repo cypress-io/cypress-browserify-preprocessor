@@ -45,7 +45,9 @@ describe('browserify preprocessor', function () {
 
     sandbox.stub(fs, 'ensureDirAsync').resolves()
 
-    this.config = {}
+    this.config = {
+      isTextTerminal: true,
+    }
     this.userOptions = {}
     this.filePath = 'path/to/file.js'
     this.outputPath = 'output/output.js'
@@ -62,7 +64,7 @@ describe('browserify preprocessor', function () {
 
   describe('exported function', function () {
     it('receives user options and returns a preprocessor function', function () {
-      expect(preprocessor(this.userOptions)).to.be.a('function')
+      expect(preprocessor(this.config, this.userOptions)).to.be.a('function')
     })
   })
 
@@ -86,7 +88,7 @@ describe('browserify preprocessor', function () {
         browserify.reset()
         browserify.returns(this.bundlerApi)
 
-        const run = preprocessor(this.userOptions)
+        const run = preprocessor(this.config, this.userOptions)
         return run(this.filePath, this.util)
         .then(() => {
           return run(this.filePath, this.util)
@@ -104,7 +106,7 @@ describe('browserify preprocessor', function () {
 
       it('specifies default extensions if none provided', function () {
         return this.run().then(() => {
-          expect(browserify.lastCall.args[0].extensions).to.eql(['.js'])
+          expect(browserify.lastCall.args[0].extensions).to.eql(['.js', '.jsx', '.coffee', '.cjsx'])
         })
       })
 
@@ -122,9 +124,25 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('includes watchifyOptions if provided', function () {
+      it('use default watchOptions if not provided', function () {
         this.config.isTextTerminal = false
-        this.userOptions.watchifyOptions = { ignoreWatch: ['node_modules'] }
+        return this.run().then(() => {
+          expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
+            ignoreWatch: [
+              '**/.git/**',
+              '**/.nyc_output/**',
+              '**/.sass-cache/**',
+              '**/bower_components/**',
+              '**/coverage/**',
+              '**/node_modules/**',
+            ],
+          })
+        })
+      })
+
+      it('includes watchOptions if provided', function () {
+        this.config.isTextTerminal = false
+        this.userOptions.watchOptions = { ignoreWatch: ['node_modules'] }
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
             ignoreWatch: ['node_modules'],
@@ -133,7 +151,6 @@ describe('browserify preprocessor', function () {
       })
 
       it('does not watch when isTextTerminal is true', function () {
-        this.config.isTextTerminal = true
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).not.to.be.called
         })
@@ -210,7 +227,6 @@ describe('browserify preprocessor', function () {
       })
 
       it('does not close bundler when isTextTerminal is true and onClose callback is called', function () {
-        this.config.isTextTerminal = true
         return this.run().then(() => {
           this.util.onClose.lastCall.args[0]()
           expect(this.bundlerApi.close).not.to.be.called
