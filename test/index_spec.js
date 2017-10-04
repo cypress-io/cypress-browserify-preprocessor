@@ -70,6 +70,11 @@ describe('browserify preprocessor', function () {
     it('throws error if config is not the first argument', function () {
       expect(preprocessor).to.throw('must be called with the Cypress config')
     })
+
+    it('has defaultOptions attached to it', function () {
+      expect(preprocessor.defaultOptions).to.be.an('object')
+      expect(preprocessor.defaultOptions.extensions).to.be.an('array')
+    })
   })
 
   describe('preprocessor function', function () {

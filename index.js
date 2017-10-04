@@ -13,7 +13,7 @@ const bundles = {}
 
 // by default, we transform JavaScript (up to anything at stage-4), JSX,
 // CoffeeScript, and CJSX (CoffeeScript + JSX)
-const defaults = {
+const defaultOptions = {
   extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
   watchOptions: {
     // ignore watching the following or the user's system can get bogged down
@@ -52,7 +52,7 @@ const defaults = {
 //
 // register('on:spec:file:preprocessor', browserify(config, userOptions))
 //
-module.exports = (config, userOptions = {}) => {
+const preprocessor = (config, userOptions = {}) => {
   log('received user options', userOptions)
 
   if (!config || typeof config.isTextTerminal !== 'boolean') {
@@ -60,7 +60,7 @@ module.exports = (config, userOptions = {}) => {
   }
 
   // allow user to override default options
-  const options = Object.assign({}, defaults, userOptions)
+  const options = Object.assign({}, defaultOptions, userOptions)
 
   // we return function that accepts the arguments provided by
   // the event 'on:spec:file:preprocessor'
@@ -187,3 +187,8 @@ module.exports = (config, userOptions = {}) => {
     return bundlePromise
   }
 }
+
+// provide a clone of the default options
+preprocessor.defaultOptions = JSON.parse(JSON.stringify(defaultOptions))
+
+module.exports = preprocessor
