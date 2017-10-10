@@ -105,6 +105,8 @@ browserify({
 })
 ```
 
+**Default**: `undefined`
+
 ## Modifying default options
 
 The default options are provided as `browserify.defaultOptions` so they can be more easily modified.
@@ -121,8 +123,6 @@ module.exports = (register, config) => {
   register('on:spec:file:preprocessor', browserify(config, options))
 }
 ```
-
-**Default**: `undefined`
 
 ## License
 
