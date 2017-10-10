@@ -115,7 +115,7 @@ If, for example, you want to update the options for the `babelify` transform to 
 const browserify = require('@cypress/browserify-preprocessor')
 
 module.exports = (register, config) => {
-  const options = browserify.options
+  const options = browserify.defaultOptions
   options.transforms[1].options.babelrc = true
 
   register('on:spec:file:preprocessor', browserify(config, options))
