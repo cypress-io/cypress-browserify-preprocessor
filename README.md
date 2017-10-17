@@ -4,7 +4,7 @@ Cypress preprocessor for bundling JavaScript via browserify
 
 ## Installation
 
-Requires [Node](https://nodejs.org/en/) version 6 or above.
+Requires [Node](https://nodejs.org/en/) version 6.5.0 or above.
 
 ```sh
 npm install --save-dev @cypress/browserify-preprocessor
