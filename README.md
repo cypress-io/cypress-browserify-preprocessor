@@ -17,8 +17,8 @@ In your project's [plugins file](https://on.cypress.io/guides/plugins):
 ```javascript
 const browserify = require('@cypress/browserify-preprocessor')
 
-module.exports = (register, config) => {
-  register('on:spec:file:preprocessor', browserify(config))
+module.exports = (on, config) => {
+  on('file:preprocessor', browserify(config))
 }
 ```
 
@@ -27,7 +27,7 @@ module.exports = (register, config) => {
 Pass in options as the second argument to `browserify`:
 
 ```javascript
-module.exports = (register, config) => {
+module.exports = (on, config) => {
   const options = {
     extensions: [],
     watchOptions: {},
@@ -35,7 +35,7 @@ module.exports = (register, config) => {
     onBundle () {},
   }
 
-  register('on:spec:file:preprocessor', browserify(config, options))
+  on('file:preprocessor', browserify(config, options))
 }
 ```
 
@@ -116,11 +116,11 @@ If, for example, you want to update the options for the `babelify` transform to 
 ```javascript
 const browserify = require('@cypress/browserify-preprocessor')
 
-module.exports = (register, config) => {
+module.exports = (on, config) => {
   const options = browserify.defaultOptions
   options.transforms[1].options.babelrc = true
 
-  register('on:spec:file:preprocessor', browserify(config, options))
+  on('file:preprocessor', browserify(config, options))
 }
 ```
 
