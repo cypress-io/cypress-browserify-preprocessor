@@ -67,7 +67,7 @@ const preprocessor = (config, userOptions = {}) => {
   //
   // this function will get called for the support file when a project is loaded
   // (if the support file is not disabled)
-  // it will also get calledfor a spec file when that spec is requested by
+  // it will also get called for a spec file when that spec is requested by
   // the Cypress runner
   //
   // when running in the GUI, it will likely get called multiple times

@@ -29,10 +29,7 @@ Pass in options as the second argument to `browserify`:
 ```javascript
 module.exports = (on, config) => {
   const options = {
-    extensions: [],
-    watchOptions: {},
-    transforms: [],
-    onBundle () {},
+    // options here
   }
 
   on('file:preprocessor', browserify(config, options))
