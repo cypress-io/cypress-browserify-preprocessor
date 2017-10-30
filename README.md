@@ -17,8 +17,8 @@ In your project's [plugins file](https://on.cypress.io/guides/plugins):
 ```javascript
 const browserify = require('@cypress/browserify-preprocessor')
 
-module.exports = (on, config) => {
-  on('file:preprocessor', browserify(config))
+module.exports = (on) => {
+  on('file:preprocessor', browserify())
 }
 ```
 
@@ -27,26 +27,50 @@ module.exports = (on, config) => {
 Pass in options as the second argument to `browserify`:
 
 ```javascript
-module.exports = (on, config) => {
+module.exports = (on) => {
   const options = {
     // options here
   }
 
-  on('file:preprocessor', browserify(config, options))
+  on('file:preprocessor', browserify(options))
 }
 ```
 
-### extensions
+### browserifyOptions
 
-Array of file extensions to supported.
+Object of options passed to [browserify](https://github.com/browserify/browserify#browserifyfiles--opts). 
+
+If you pass one of these top-level options in, it will override the default. So if pass `extensions: ['.cljs']`, the default extensions (`js, jsx, coffee, cjsx`) will no longer be supported. If you wish to add to the supported extensions, read up on [modifying the default options](#modifying-default-options).
+
+As long as the config passed from Cypress indicates that the plugin should watch files, [watchify](https://github.com/browserify/watchify) is automatically configured as a plugin, so there's no need to manually specify it.
 
 **Default**:
 
 ```javascript
-['.js', '.jsx', '.coffee', '.cjsx']
+{
+  extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
+  transform: [
+    [
+      'cjsxify',
+      {},
+    ],
+    [
+      'babelify',
+      {
+        ast: false,
+        babelrc: false,
+        plugins: ['babel-plugin-add-module-exports'],
+        presets: ['babel-preset-env', 'babel-preset-react'],
+      },
+    ],
+  ],
+  plugin: [],
+  cache: {},
+  packageCache: {},
+}
 ```
 
-### watchOptions
+### watchifyOptions
 
 Object of options passed to [watchify](https://github.com/browserify/watchify#options)
 
@@ -63,30 +87,6 @@ Object of options passed to [watchify](https://github.com/browserify/watchify#op
     '**/node_modules/**',
   ],
 }
-```
-
-### transforms
-
-Array of transforms. Each item is an object with a `transform` set to the path to a transform package or the required module itself and `options` set to the options for that transform.
-
-**Default**:
-
-```javascript
-[
-  {
-    transform: 'cjsxify',
-    options: {},
-  },
-  {
-    transform: 'babelify',
-    options: {
-      ast: false,
-      babelrc: false,
-      plugins: ['babel-plugin-add-module-exports'],
-      presets: ['babel-preset-env', 'babel-preset-react'],
-    },
-  },
-]
 ```
 
 ### onBundle
@@ -108,17 +108,31 @@ browserify({
 
 The default options are provided as `browserify.defaultOptions` so they can be more easily modified.
 
-If, for example, you want to update the options for the `babelify` transform to turn on `babelrc`, you could do the following:
+If, for example, you want to update the options for the `babelify` transform to turn on `babelrc` loading, you could do the following:
 
 ```javascript
 const browserify = require('@cypress/browserify-preprocessor')
 
-module.exports = (on, config) => {
+module.exports = (on) => {
   const options = browserify.defaultOptions
   options.transforms[1].options.babelrc = true
 
-  on('file:preprocessor', browserify(config, options))
+  on('file:preprocessor', browserify(options))
 }
+```
+
+## Contributing
+
+Run all tests once:
+
+```shell
+npm test
+```
+
+Run tests in watch mode:
+
+```shell
+npm run test-watch
 ```
 
 ## License

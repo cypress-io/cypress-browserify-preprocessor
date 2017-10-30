@@ -14,8 +14,31 @@ const bundles = {}
 // by default, we transform JavaScript (up to anything at stage-4), JSX,
 // CoffeeScript, and CJSX (CoffeeScript + JSX)
 const defaultOptions = {
-  extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
-  watchOptions: {
+  browserifyOptions: {
+    extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
+    transform: [
+      [
+        require.resolve('./cjsxify'),
+        {},
+      ],
+      [
+        require.resolve('babelify'),
+        {
+          ast: false,
+          babelrc: false,
+          // irons out differents between ES6 modules and node exports
+          plugins: ['babel-plugin-add-module-exports'].map(require.resolve),
+          // babel-preset-env supports any JS that's stage-4, meaning it's
+          // completely finalized in the ECMA standard
+          presets: ['babel-preset-env', 'babel-preset-react'].map(require.resolve),
+        },
+      ],
+    ],
+    plugin: [],
+    cache: {},
+    packageCache: {},
+  },
+  watchifyOptions: {
     // ignore watching the following or the user's system can get bogged down
     // by watchers
     ignoreWatch: [
@@ -27,40 +50,19 @@ const defaultOptions = {
       '**/node_modules/**',
     ],
   },
-  transforms: [
-    {
-      transform: require.resolve('./cjsxify'),
-      options: {},
-    },
-    {
-      transform: require.resolve('babelify'),
-      options: {
-        ast: false,
-        babelrc: false,
-        // irons out differents between ES6 modules and node exports
-        plugins: ['babel-plugin-add-module-exports'].map(require.resolve),
-        // babel-preset-env supports any JS that's stage-4, meaning it's
-        // completely finalized in the ECMA standard
-        presets: ['babel-preset-env', 'babel-preset-react'].map(require.resolve),
-      },
-    },
-  ],
 }
 
 // export a function that returns another function, making it easy for users
 // to configure like so:
 //
-// on('file:preprocessor', browserify(config, userOptions))
+// on('file:preprocessor', browserify(options))
 //
-const preprocessor = (config, userOptions = {}) => {
-  log('received user options', userOptions)
-
-  if (!config || typeof config.isTextTerminal !== 'boolean') {
-    throw new Error(`Cypress Browserify Preprocessor must be called with the Cypress config as its first argument. You passed: ${JSON.stringify(config, null, 2)}`)
-  }
+const preprocessor = (options = {}) => {
+  log('received user options', options)
 
   // allow user to override default options
-  const options = Object.assign({}, defaultOptions, userOptions)
+  const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions)
+  const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -73,7 +75,8 @@ const preprocessor = (config, userOptions = {}) => {
   // when running in the GUI, it will likely get called multiple times
   // with the same filePath, as the user could re-run the tests, causing
   // the supported file and spec file to be requested again
-  return (filePath, util) => {
+  return (config) => {
+    const filePath = config.filePath
     log('get', filePath)
 
     // since this function can get called multiple times with the same
@@ -84,27 +87,25 @@ const preprocessor = (config, userOptions = {}) => {
       return bundles[filePath]
     }
 
-    // if we're in a text terminal, this is a one-time run, probably in CI
-    // so we don't need to watch
-    const shouldWatch = !config.isTextTerminal
     // util.getOutputPath returns a path alongside Cypress's other app data
     // files so we don't have to worry about where to put the bundled
     // file on disk
-    const outputPath = util.getOutputPath(filePath)
+    const outputPath = config.outputPath
 
     log(`input: ${filePath}`)
     log(`output: ${outputPath}`)
 
-    const bundler = browserify({
+    // we need to override and control entries
+    Object.assign(browserifyOptions, {
       entries: [filePath],
-      extensions: options.extensions,
-      cache: {},
-      packageCache: {},
     })
 
-    if (shouldWatch) {
+    log('browserifyOptions:', browserifyOptions)
+    const bundler = browserify(browserifyOptions)
+
+    if (config.shouldWatch) {
       log('watching')
-      bundler.plugin(watchify, options.watchOptions || {})
+      bundler.plugin(watchify, watchifyOptions)
     }
 
     // yield the bundle if onBundle is specified so the user can modify it
@@ -112,15 +113,6 @@ const preprocessor = (config, userOptions = {}) => {
     const onBundle = options.onBundle
     if (typeof onBundle === 'function') {
       onBundle(bundler)
-    }
-
-    // transforms are part of the options so that users can easily override
-    // the options of the default cjsxify and babelify tranforms
-    const transforms = options.transforms
-    if (Object.prototype.toString.call(transforms) === '[object Array]') {
-      transforms.forEach((transform) => {
-        bundler.transform(transform.transform, transform.options)
-      })
     }
 
     // this kicks off the bundling and wraps it up in a promise. the promise
@@ -148,21 +140,21 @@ const preprocessor = (config, userOptions = {}) => {
         ws.on('error', onError)
 
         bundler
-        .bundle()
-        .on('error', onError)
-        .pipe(ws)
+          .bundle()
+          .on('error', onError)
+          .pipe(ws)
       })
     }
 
-    // when we're notified of an update via watchify, we call `util.fileUpdated`
-    // to let Cypress know to re-run the spec
+    // when we're notified of an update via watchify, signal for Cypres to
+    // rerun the spec
     bundler.on('update', () => {
       log(`update ${filePath}`)
       // we overwrite the cached bundle promise, so on subsequent invocations
       // it gets the latest bundle
       bundles[filePath] = bundle().tap(() => {
         log(`- update finished for ${filePath}`)
-        util.fileUpdated(filePath)
+        config.emit('rerun')
       })
     })
 
@@ -174,10 +166,10 @@ const preprocessor = (config, userOptions = {}) => {
 
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
-    util.onClose(() => {
+    config.on('close', () => {
       log(`close ${filePath}`)
       delete bundles[filePath]
-      if (shouldWatch) {
+      if (config.shouldWatch) {
         bundler.close()
       }
     })

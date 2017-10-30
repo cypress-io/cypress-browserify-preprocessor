@@ -45,41 +45,34 @@ describe('browserify preprocessor', function () {
 
     sandbox.stub(fs, 'ensureDirAsync').resolves()
 
+    this.options = {}
     this.config = {
-      isTextTerminal: true,
-    }
-    this.userOptions = {}
-    this.filePath = 'path/to/file.js'
-    this.outputPath = 'output/output.js'
-    this.util = {
-      getOutputPath: sandbox.stub().returns(this.outputPath),
-      fileUpdated: sandbox.spy(),
-      onClose: sandbox.stub(),
+      filePath: 'path/to/file.js',
+      outputPath: 'output/output.js',
+      shouldWatch: false,
+      on: sandbox.stub(),
+      emit: sandbox.spy(),
     }
 
     this.run = () => {
-      return preprocessor(this.config, this.userOptions)(this.filePath, this.util)
+      return preprocessor(this.options)(this.config)
     }
   })
 
   describe('exported function', function () {
     it('receives user options and returns a preprocessor function', function () {
-      expect(preprocessor(this.config, this.userOptions)).to.be.a('function')
-    })
-
-    it('throws error if config is not the first argument', function () {
-      expect(preprocessor).to.throw('must be called with the Cypress config')
+      expect(preprocessor(this.options)).to.be.a('function')
     })
 
     it('has defaultOptions attached to it', function () {
       expect(preprocessor.defaultOptions).to.be.an('object')
-      expect(preprocessor.defaultOptions.extensions).to.be.an('array')
+      expect(preprocessor.defaultOptions.browserifyOptions).to.be.an('object')
     })
   })
 
   describe('preprocessor function', function () {
     afterEach(function () {
-      this.util.onClose.yield() // resets the cached bundles
+      this.config.on.withArgs('close').yield() // resets the cached bundles
     })
 
     describe('when it finishes cleanly', function () {
@@ -97,10 +90,10 @@ describe('browserify preprocessor', function () {
         browserify.reset()
         browserify.returns(this.bundlerApi)
 
-        const run = preprocessor(this.config, this.userOptions)
-        return run(this.filePath, this.util)
+        const run = preprocessor(this.options)
+        return run(this.config)
         .then(() => {
-          return run(this.filePath, this.util)
+          return run(this.config)
         })
         .then(() => {
           expect(browserify).to.be.calledOnce
@@ -109,7 +102,7 @@ describe('browserify preprocessor', function () {
 
       it('specifies the entry file', function () {
         return this.run().then(() => {
-          expect(browserify.lastCall.args[0].entries[0]).to.equal(this.filePath)
+          expect(browserify.lastCall.args[0].entries[0]).to.equal(this.config.filePath)
         })
       })
 
@@ -120,21 +113,21 @@ describe('browserify preprocessor', function () {
       })
 
       it('uses provided extensions', function () {
-        this.userOptions.extensions = ['.coffee']
+        this.options.browserifyOptions = { extensions: ['.coffee'] }
         return this.run().then(() => {
           expect(browserify.lastCall.args[0].extensions).to.eql(['.coffee'])
         })
       })
 
-      it('watches when isTextTerminal is false', function () {
-        this.config.isTextTerminal = false
+      it('watches when shouldWatch is true', function () {
+        this.config.shouldWatch = true
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify)
         })
       })
 
-      it('use default watchOptions if not provided', function () {
-        this.config.isTextTerminal = false
+      it('use default watchifyOptions if not provided', function () {
+        this.config.shouldWatch = true
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
             ignoreWatch: [
@@ -149,9 +142,9 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('includes watchOptions if provided', function () {
-        this.config.isTextTerminal = false
-        this.userOptions.watchOptions = { ignoreWatch: ['node_modules'] }
+      it('includes watchifyOptions if provided', function () {
+        this.config.shouldWatch = true
+        this.options.watchifyOptions = { ignoreWatch: ['node_modules'] }
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
             ignoreWatch: ['node_modules'],
@@ -159,25 +152,24 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('does not watch when isTextTerminal is true', function () {
+      it('does not watch when shouldWatch is false', function () {
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).not.to.be.called
         })
       })
 
       it('calls onBundle callback with bundler', function () {
-        this.userOptions.onBundle = sandbox.spy()
+        this.options.onBundle = sandbox.spy()
         return this.run().then(() => {
-          expect(this.userOptions.onBundle).to.be.calledWith(this.bundlerApi)
+          expect(this.options.onBundle).to.be.calledWith(this.bundlerApi)
         })
       })
 
-      it('applies transforms provided', function () {
-        const transform = () => {}
-        const options = {}
-        this.userOptions.transforms = [{ transform, options }]
+      it('uses transforms if provided', function () {
+        const transform = [() => {},  {}]
+        this.options.browserifyOptions = { transform }
         return this.run().then(() => {
-          expect(this.bundlerApi.transform).to.be.calledWith(transform, options)
+          expect(browserify.lastCall.args[0].transform).to.eql(transform)
         })
       })
 
@@ -189,7 +181,7 @@ describe('browserify preprocessor', function () {
 
       it('creates write stream to output path', function () {
         return this.run().then(() => {
-          expect(fs.createWriteStream).to.be.calledWith(this.outputPath)
+          expect(fs.createWriteStream).to.be.calledWith(this.config.outputPath)
         })
       })
 
@@ -201,8 +193,7 @@ describe('browserify preprocessor', function () {
 
       it('resolves with the output path', function () {
         return this.run().then((outputPath) => {
-          expect(this.util.getOutputPath).to.be.calledWith(this.filePath)
-          expect(outputPath).to.be.equal(this.outputPath)
+          expect(outputPath).to.equal(this.config.outputPath)
         })
       })
 
@@ -213,31 +204,24 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('calls util.fileUpdated when there is an update', function () {
+      it('emits `rerun` when there is an update', function () {
         this.bundlerApi.on.withArgs('update').yields()
         return this.run().then(() => {
-          expect(this.util.fileUpdated).to.be.calledWith(this.filePath)
+          expect(this.config.emit).to.be.calledWith('rerun')
         })
       })
 
-      it('registers onClose callback', function () {
+      it('closes bundler when shouldWatc is true and `close` is emitted', function () {
+        this.config.shouldWatch = true
         return this.run().then(() => {
-          expect(this.util.onClose).to.be.called
-          expect(this.util.onClose.lastCall.args[0]).to.be.a('function')
-        })
-      })
-
-      it('closes bundler when isTextTerminal is false and onClose callback is called', function () {
-        this.config.isTextTerminal = false
-        return this.run().then(() => {
-          this.util.onClose.lastCall.args[0]()
+          this.config.on.withArgs('close').yield()
           expect(this.bundlerApi.close).to.be.called
         })
       })
 
-      it('does not close bundler when isTextTerminal is true and onClose callback is called', function () {
+      it('does not close bundler when shouldWatch is false and `close` is emitted', function () {
         return this.run().then(() => {
-          this.util.onClose.lastCall.args[0]()
+          this.config.on.withArgs('close').yield()
           expect(this.bundlerApi.close).not.to.be.called
         })
       })
