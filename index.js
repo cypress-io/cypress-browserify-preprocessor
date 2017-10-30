@@ -87,8 +87,8 @@ const preprocessor = (options = {}) => {
       return bundles[filePath]
     }
 
-    // util.getOutputPath returns a path alongside Cypress's other app data
-    // files so we don't have to worry about where to put the bundled
+    // we're provided a default output path that lives alongside Cypress's
+    // app data files so we don't have to worry about where to put the bundled
     // file on disk
     const outputPath = config.outputPath
 
