@@ -30,6 +30,7 @@
     "secure": "nsp check",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "mocha",
+    "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'"
   },
   "release": {

@@ -211,7 +211,7 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      it('closes bundler when shouldWatc is true and `close` is emitted', function () {
+      it('closes bundler when shouldWatch is true and `close` is emitted', function () {
         this.config.shouldWatch = true
         return this.run().then(() => {
           this.config.on.withArgs('close').yield()
@@ -252,6 +252,42 @@ describe('browserify preprocessor', function () {
         this.createWriteStreamApi.on.withArgs('error').yields(this.err)
         return this.run().catch((err) => {
           expect(err.originalStack).to.equal(this.err.stack)
+        })
+      })
+
+      it('does not trigger unhandled rejection when bundle errors after update', function (done) {
+        const handler = sandbox.spy()
+        process.on('unhandledRejection', handler)
+        this.createWriteStreamApi.on.withArgs('finish').onFirstCall().yields()
+
+        this.config.emit = () => {
+          setTimeout(() => {
+            expect(handler).not.to.be.called
+            process.removeListener('unhandledRejection', handler)
+            done()
+          }, 500)
+        }
+
+        this.run().then(() => {
+          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () {} })
+          this.bundlerApi.on.withArgs('update').yield()
+        })
+      })
+
+      it('rejects subsequent request after and update bundle errors', function () {
+        this.createWriteStreamApi.on.withArgs('finish').onFirstCall().yields()
+        const run = preprocessor(this.options)
+        return run(this.config)
+        .then(() => {
+          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () {} })
+          this.bundlerApi.on.withArgs('update').yield()
+          return run(this.config)
+        })
+        .then(() => {
+          throw new Error('should not resolve')
+        })
+        .catch((err) => {
+          expect(err.message).to.contain('bundle error')
         })
       })
     })

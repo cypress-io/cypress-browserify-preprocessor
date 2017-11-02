@@ -146,16 +146,21 @@ const preprocessor = (options = {}) => {
       })
     }
 
-    // when we're notified of an update via watchify, signal for Cypres to
+    // when we're notified of an update via watchify, signal for Cypress to
     // rerun the spec
     bundler.on('update', () => {
       log(`update ${filePath}`)
       // we overwrite the cached bundle promise, so on subsequent invocations
       // it gets the latest bundle
-      bundles[filePath] = bundle().tap(() => {
+      const bundlePromise = bundles[filePath] = bundle()
+      .finally(() => {
         log(`- update finished for ${filePath}`)
         config.emit('rerun')
       })
+      // we suppress unhandled rejections so they don't bubble up to the
+      // unhandledRejection handler and crash the app. Cypress will eventually
+      // take care of the rejection when the file is requested
+      bundlePromise.suppressUnhandledRejections()
     })
 
     const bundlePromise = fs.ensureDirAsync(path.dirname(outputPath)).then(bundle)
