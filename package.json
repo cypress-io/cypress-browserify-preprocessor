@@ -34,12 +34,6 @@
     "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'",
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
-  "release": {
-    "verifyRelease": {
-      "path": "dont-crack",
-      "test-against": []
-    }
-  },
   "devDependencies": {
     "ban-sensitive-files": "1.9.0",
     "chai": "4.1.2",
