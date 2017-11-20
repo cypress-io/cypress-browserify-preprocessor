@@ -75,8 +75,8 @@ const preprocessor = (options = {}) => {
   // when running in the GUI, it will likely get called multiple times
   // with the same filePath, as the user could re-run the tests, causing
   // the supported file and spec file to be requested again
-  return (config) => {
-    const filePath = config.filePath
+  return (file) => {
+    const filePath = file.filePath
     log('get', filePath)
 
     // since this function can get called multiple times with the same
@@ -90,7 +90,7 @@ const preprocessor = (options = {}) => {
     // we're provided a default output path that lives alongside Cypress's
     // app data files so we don't have to worry about where to put the bundled
     // file on disk
-    const outputPath = config.outputPath
+    const outputPath = file.outputPath
 
     log(`input: ${filePath}`)
     log(`output: ${outputPath}`)
@@ -103,7 +103,7 @@ const preprocessor = (options = {}) => {
     log('browserifyOptions:', browserifyOptions)
     const bundler = browserify(browserifyOptions)
 
-    if (config.shouldWatch) {
+    if (file.shouldWatch) {
       log('watching')
       bundler.plugin(watchify, watchifyOptions)
     }
@@ -155,7 +155,7 @@ const preprocessor = (options = {}) => {
       const bundlePromise = bundles[filePath] = bundle()
       .finally(() => {
         log(`- update finished for ${filePath}`)
-        config.emit('rerun')
+        file.emit('rerun')
       })
       // we suppress unhandled rejections so they don't bubble up to the
       // unhandledRejection handler and crash the app. Cypress will eventually
@@ -171,10 +171,10 @@ const preprocessor = (options = {}) => {
 
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
-    config.on('close', () => {
+    file.on('close', () => {
       log(`close ${filePath}`)
       delete bundles[filePath]
-      if (config.shouldWatch) {
+      if (file.shouldWatch) {
         bundler.close()
       }
     })

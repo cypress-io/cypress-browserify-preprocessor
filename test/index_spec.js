@@ -46,7 +46,7 @@ describe('browserify preprocessor', function () {
     sandbox.stub(fs, 'ensureDirAsync').resolves()
 
     this.options = {}
-    this.config = {
+    this.file = {
       filePath: 'path/to/file.js',
       outputPath: 'output/output.js',
       shouldWatch: false,
@@ -55,7 +55,7 @@ describe('browserify preprocessor', function () {
     }
 
     this.run = () => {
-      return preprocessor(this.options)(this.config)
+      return preprocessor(this.options)(this.file)
     }
   })
 
@@ -72,7 +72,7 @@ describe('browserify preprocessor', function () {
 
   describe('preprocessor function', function () {
     afterEach(function () {
-      this.config.on.withArgs('close').yield() // resets the cached bundles
+      this.file.on.withArgs('close').yield() // resets the cached bundles
     })
 
     describe('when it finishes cleanly', function () {
@@ -91,9 +91,9 @@ describe('browserify preprocessor', function () {
         browserify.returns(this.bundlerApi)
 
         const run = preprocessor(this.options)
-        return run(this.config)
+        return run(this.file)
         .then(() => {
-          return run(this.config)
+          return run(this.file)
         })
         .then(() => {
           expect(browserify).to.be.calledOnce
@@ -102,7 +102,7 @@ describe('browserify preprocessor', function () {
 
       it('specifies the entry file', function () {
         return this.run().then(() => {
-          expect(browserify.lastCall.args[0].entries[0]).to.equal(this.config.filePath)
+          expect(browserify.lastCall.args[0].entries[0]).to.equal(this.file.filePath)
         })
       })
 
@@ -120,14 +120,14 @@ describe('browserify preprocessor', function () {
       })
 
       it('watches when shouldWatch is true', function () {
-        this.config.shouldWatch = true
+        this.file.shouldWatch = true
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify)
         })
       })
 
       it('use default watchifyOptions if not provided', function () {
-        this.config.shouldWatch = true
+        this.file.shouldWatch = true
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
             ignoreWatch: [
@@ -143,7 +143,7 @@ describe('browserify preprocessor', function () {
       })
 
       it('includes watchifyOptions if provided', function () {
-        this.config.shouldWatch = true
+        this.file.shouldWatch = true
         this.options.watchifyOptions = { ignoreWatch: ['node_modules'] }
         return this.run().then(() => {
           expect(this.bundlerApi.plugin).to.be.calledWith(watchify, {
@@ -181,7 +181,7 @@ describe('browserify preprocessor', function () {
 
       it('creates write stream to output path', function () {
         return this.run().then(() => {
-          expect(fs.createWriteStream).to.be.calledWith(this.config.outputPath)
+          expect(fs.createWriteStream).to.be.calledWith(this.file.outputPath)
         })
       })
 
@@ -193,7 +193,7 @@ describe('browserify preprocessor', function () {
 
       it('resolves with the output path', function () {
         return this.run().then((outputPath) => {
-          expect(outputPath).to.equal(this.config.outputPath)
+          expect(outputPath).to.equal(this.file.outputPath)
         })
       })
 
@@ -207,21 +207,21 @@ describe('browserify preprocessor', function () {
       it('emits `rerun` when there is an update', function () {
         this.bundlerApi.on.withArgs('update').yields()
         return this.run().then(() => {
-          expect(this.config.emit).to.be.calledWith('rerun')
+          expect(this.file.emit).to.be.calledWith('rerun')
         })
       })
 
       it('closes bundler when shouldWatch is true and `close` is emitted', function () {
-        this.config.shouldWatch = true
+        this.file.shouldWatch = true
         return this.run().then(() => {
-          this.config.on.withArgs('close').yield()
+          this.file.on.withArgs('close').yield()
           expect(this.bundlerApi.close).to.be.called
         })
       })
 
       it('does not close bundler when shouldWatch is false and `close` is emitted', function () {
         return this.run().then(() => {
-          this.config.on.withArgs('close').yield()
+          this.file.on.withArgs('close').yield()
           expect(this.bundlerApi.close).not.to.be.called
         })
       })
@@ -260,7 +260,7 @@ describe('browserify preprocessor', function () {
         process.on('unhandledRejection', handler)
         this.createWriteStreamApi.on.withArgs('finish').onFirstCall().yields()
 
-        this.config.emit = () => {
+        this.file.emit = () => {
           setTimeout(() => {
             expect(handler).not.to.be.called
             process.removeListener('unhandledRejection', handler)
@@ -277,11 +277,11 @@ describe('browserify preprocessor', function () {
       it('rejects subsequent request after and update bundle errors', function () {
         this.createWriteStreamApi.on.withArgs('finish').onFirstCall().yields()
         const run = preprocessor(this.options)
-        return run(this.config)
+        return run(this.file)
         .then(() => {
           streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () {} })
           this.bundlerApi.on.withArgs('update').yield()
-          return run(this.config)
+          return run(this.file)
         })
         .then(() => {
           throw new Error('should not resolve')
