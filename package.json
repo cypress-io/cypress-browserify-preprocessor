@@ -26,7 +26,7 @@
     "ban": "ban",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "prettier-eslint --trailing-comma es5 --no-semi --single-quote --write '*.js'",
+    "lint": "prettier-eslint --no-semi --write '*.js'",
     "secure": "nsp check",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "test": "mocha",
