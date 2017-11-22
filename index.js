@@ -17,7 +17,10 @@ const defaultOptions = {
   browserifyOptions: {
     extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
     transform: [
-      [require.resolve('./cjsxify'), {}],
+      [
+        require.resolve('./cjsxify'),
+        {},
+      ],
       [
         require.resolve('babelify'),
         {
@@ -27,9 +30,7 @@ const defaultOptions = {
           plugins: ['babel-plugin-add-module-exports'].map(require.resolve),
           // babel-preset-env supports any JS that's stage-4, meaning it's
           // completely finalized in the ECMA standard
-          presets: ['babel-preset-env', 'babel-preset-react'].map(
-            require.resolve
-          ),
+          presets: ['babel-preset-env', 'babel-preset-react'].map(require.resolve),
         },
       ],
     ],
@@ -60,16 +61,8 @@ const preprocessor = (options = {}) => {
   log('received user options', options)
 
   // allow user to override default options
-  const browserifyOptions = Object.assign(
-    {},
-    defaultOptions.browserifyOptions,
-    options.browserifyOptions
-  )
-  const watchifyOptions = Object.assign(
-    {},
-    defaultOptions.watchifyOptions,
-    options.watchifyOptions
-  )
+  const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions)
+  const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -171,8 +164,8 @@ const preprocessor = (options = {}) => {
     })
 
     const bundlePromise = fs
-      .ensureDirAsync(path.dirname(outputPath))
-      .then(bundle)
+    .ensureDirAsync(path.dirname(outputPath))
+    .then(bundle)
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
