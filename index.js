@@ -159,10 +159,11 @@ const preprocessor = (options = {}) => {
       log(`update ${filePath}`)
       // we overwrite the cached bundle promise, so on subsequent invocations
       // it gets the latest bundle
-      const bundlePromise = (bundles[filePath] = bundle().finally(() => {
+      const bundlePromise = bundle().finally(() => {
         log(`- update finished for ${filePath}`)
         file.emit('rerun')
-      }))
+      })
+      bundles[filePath] = bundlePromise
       // we suppress unhandled rejections so they don't bubble up to the
       // unhandledRejection handler and crash the app. Cypress will eventually
       // take care of the rejection when the file is requested
