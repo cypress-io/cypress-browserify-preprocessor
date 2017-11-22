@@ -140,9 +140,9 @@ const preprocessor = (options = {}) => {
         ws.on('error', onError)
 
         bundler
-          .bundle()
-          .on('error', onError)
-          .pipe(ws)
+        .bundle()
+        .on('error', onError)
+        .pipe(ws)
       })
     }
 
