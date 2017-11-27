@@ -20,7 +20,7 @@ npm install --save-dev @cypress/browserify-preprocessor
 
 ## Usage
 
-In your project's [plugins file](https://on.cypress.io/guides/plugins):
+In your project's [plugins file](https://docs.cypress.io/guides/guides/plugins-guide.html):
 
 ```javascript
 const browserify = require('@cypress/browserify-preprocessor')
