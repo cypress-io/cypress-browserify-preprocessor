@@ -119,6 +119,26 @@ describe('browserify preprocessor', function () {
         })
       })
 
+      it('starts with clean cache and packageCache', function () {
+        browserify.reset()
+        browserify.returns(this.bundlerApi)
+
+        const run = preprocessor(this.options)
+        return run(this.file)
+        .then(() => {
+          browserify.lastCall.args[0].cache = { foo: 'bar' }
+          browserify.lastCall.args[0].packageCache = { foo: 'bar' }
+          this.file.on.withArgs('close').yield()
+
+          return run(this.file)
+        })
+        .then(() => {
+          expect(browserify).to.be.calledTwice
+          expect(browserify.lastCall.args[0].cache).to.eql({})
+          expect(browserify.lastCall.args[0].packageCache).to.eql({})
+        })
+      })
+
       it('watches when shouldWatch is true', function () {
         this.file.shouldWatch = true
         return this.run().then(() => {
@@ -166,7 +186,7 @@ describe('browserify preprocessor', function () {
       })
 
       it('uses transforms if provided', function () {
-        const transform = [() => {},  {}]
+        const transform = [() => {}, {}]
         this.options.browserifyOptions = { transform }
         return this.run().then(() => {
           expect(browserify.lastCall.args[0].transform).to.eql(transform)
