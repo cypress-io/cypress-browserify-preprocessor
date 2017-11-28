@@ -60,10 +60,6 @@ const defaultOptions = {
 const preprocessor = (options = {}) => {
   log('received user options', options)
 
-  // allow user to override default options
-  const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions)
-  const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
-
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
   //
@@ -94,6 +90,10 @@ const preprocessor = (options = {}) => {
 
     log(`input: ${filePath}`)
     log(`output: ${outputPath}`)
+
+    // allow user to override default options
+    const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions)
+    const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
     // we need to override and control entries
     Object.assign(browserifyOptions, {
