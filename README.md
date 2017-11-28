@@ -4,7 +4,7 @@ Cypress preprocessor for bundling JavaScript via browserify.
 
 This is the default preprocessor that comes packaged with Cypress. You'd typically need to install this if you want to modify the default options we've configured.
 
-Modifying the default options allows you to add support for things like: 
+Modifying the default options allows you to add support for things like:
 
 - TypeScript
 - Babel Plugins
@@ -20,7 +20,7 @@ npm install --save-dev @cypress/browserify-preprocessor
 
 ## Usage
 
-In your project's [plugins file](https://on.cypress.io/guides/plugins):
+In your project's [plugins file](https://on.cypress.io/plugins-guide):
 
 ```javascript
 const browserify = require('@cypress/browserify-preprocessor')
