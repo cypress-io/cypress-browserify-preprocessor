@@ -35,8 +35,6 @@ const defaultOptions = {
       ],
     ],
     plugin: [],
-    cache: {},
-    packageCache: {},
   },
   watchifyOptions: {
     // ignore watching the following or the user's system can get bogged down
@@ -92,7 +90,11 @@ const preprocessor = (options = {}) => {
     log(`output: ${outputPath}`)
 
     // allow user to override default options
-    const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions)
+    const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions, {
+      // these must always be new objects or 'update' events will not fire
+      cache: {},
+      packageCache: {},
+    })
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
     // we need to override and control entries

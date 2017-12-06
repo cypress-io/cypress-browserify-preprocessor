@@ -126,8 +126,8 @@ describe('browserify preprocessor', function () {
         const run = preprocessor(this.options)
         return run(this.file)
         .then(() => {
-          browserify.lastCall.args[0].cache = { foo: 'bar' }
-          browserify.lastCall.args[0].packageCache = { foo: 'bar' }
+          browserify.lastCall.args[0].cache.foo = 'bar'
+          browserify.lastCall.args[0].packageCache.foo = 'bar'
           this.file.on.withArgs('close').yield()
 
           return run(this.file)
