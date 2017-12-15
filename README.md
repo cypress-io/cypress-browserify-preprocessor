@@ -90,6 +90,8 @@ If you pass one of the top-level options in (`extensions`, `transform`, etc), it
 }
 ```
 
+*Note*: `cache` and `packageCache` are always set to `{}` and cannot be overridden. Otherwise, file watching would not function correctly.
+
 ### watchifyOptions
 
 Object of options passed to [watchify](https://github.com/browserify/watchify#options)
