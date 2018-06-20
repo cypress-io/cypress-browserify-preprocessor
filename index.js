@@ -7,7 +7,7 @@ const fs = require('./fs')
 const browserify = require('browserify')
 const watchify = require('watchify')
 
-const log = require('debug')('cypress:browserify')
+const debug = require('debug')('cypress:browserify')
 
 const bundles = {}
 
@@ -56,7 +56,7 @@ const defaultOptions = {
 // on('file:preprocessor', browserify(options))
 //
 const preprocessor = (options = {}) => {
-  log('received user options', options)
+  debug('received user options: %o', options)
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -71,13 +71,13 @@ const preprocessor = (options = {}) => {
   // the supported file and spec file to be requested again
   return (file) => {
     const filePath = file.filePath
-    log('get', filePath)
+    debug('get:', filePath)
 
     // since this function can get called multiple times with the same
     // filePath, we return the cached bundle promise if we already have one
     // since we don't want or need to re-initiate browserify/watchify for it
     if (bundles[filePath]) {
-      log(`already have bundle for ${filePath}`)
+      debug('already have bundle for:', filePath)
       return bundles[filePath]
     }
 
@@ -86,8 +86,8 @@ const preprocessor = (options = {}) => {
     // file on disk
     const outputPath = file.outputPath
 
-    log(`input: ${filePath}`)
-    log(`output: ${outputPath}`)
+    debug('input:', filePath)
+    debug('output:', outputPath)
 
     // allow user to override default options
     const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions, {
@@ -102,11 +102,11 @@ const preprocessor = (options = {}) => {
       entries: [filePath],
     })
 
-    log('browserifyOptions:', browserifyOptions)
+    debug('browserifyOptions %o:', browserifyOptions)
     const bundler = browserify(browserifyOptions)
 
     if (file.shouldWatch) {
-      log('watching')
+      debug('watching')
       bundler.plugin(watchify, watchifyOptions)
     }
 
@@ -123,20 +123,20 @@ const preprocessor = (options = {}) => {
     // the file from
     const bundle = () => {
       return new Promise((resolve, reject) => {
-        log(`making bundle ${outputPath}`)
+        debug(`making bundle ${outputPath}`)
 
         const onError = (err) => {
           err.filePath = filePath
           // backup the original stack before its
           // potentially modified from bluebird
           err.originalStack = err.stack
-          log(`errored bundling ${outputPath}`, err)
+          debug(`errored bundling: ${outputPath}`, err)
           reject(err)
         }
 
         const ws = fs.createWriteStream(outputPath)
         ws.on('finish', () => {
-          log(`finished bundling ${outputPath}`)
+          debug('finished bundling:', outputPath)
           resolve(outputPath)
         })
         ws.on('error', onError)
@@ -151,11 +151,11 @@ const preprocessor = (options = {}) => {
     // when we're notified of an update via watchify, signal for Cypress to
     // rerun the spec
     bundler.on('update', () => {
-      log(`update ${filePath}`)
+      debug('update:', filePath)
       // we overwrite the cached bundle promise, so on subsequent invocations
       // it gets the latest bundle
       const bundlePromise = bundle().finally(() => {
-        log(`- update finished for ${filePath}`)
+        debug('- update finished for:', filePath)
         file.emit('rerun')
       })
       bundles[filePath] = bundlePromise
@@ -176,7 +176,7 @@ const preprocessor = (options = {}) => {
     // when the spec or project is closed, we need to clean up the cached
     // bundle promise and stop the watcher via `bundler.close()`
     file.on('close', () => {
-      log(`close ${filePath}`)
+      debug('close:', filePath)
       delete bundles[filePath]
       if (file.shouldWatch) {
         bundler.close()
