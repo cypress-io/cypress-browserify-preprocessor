@@ -31,9 +31,11 @@
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "precommit": "npm run lint",
     "pretest": "npm run lint",
-    "test": "mocha",
+    "test": "npm run test-unit && npm run test-e2e",
+    "test-e2e": "mocha test/e2e/*.js",
+    "test-unit": "mocha test/unit/*.js",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
-    "test-watch": "chokidar '*.js' 'test/*.js' -c 'npm test'",
+    "test-watch": "chokidar '*.js' 'test/unit/*.js' -c 'npm test'",
     "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
   },
   "devDependencies": {
@@ -56,7 +58,8 @@
     "semantic-release": "8.2.0",
     "simple-commit-message": "3.3.1",
     "sinon": "3.2.1",
-    "sinon-chai": "2.13.0"
+    "sinon-chai": "2.13.0",
+    "snap-shot-it": "5.0.1"
   },
   "dependencies": {
     "babel-plugin-add-module-exports": "0.2.1",
