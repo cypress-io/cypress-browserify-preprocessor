@@ -20,8 +20,8 @@ const streamApi = {
 }
 streamApi.on = sandbox.stub().returns(streamApi)
 
-const fs = require('../fs')
-const preprocessor = require('../index')
+const fs = require('../../fs')
+const preprocessor = require('../../index')
 
 describe('browserify preprocessor', function () {
   beforeEach(function () {
