@@ -80,7 +80,7 @@ If you pass one of the top-level options in (`extensions`, `transform`, etc), it
         ast: false,
         babelrc: false,
         plugins: ['babel-plugin-add-module-exports'],
-        presets: ['babel-preset-env', 'babel-preset-react']
+        presets: ['@babel/preset-env', '@babel/preset-react']
       },
     ]
   ],

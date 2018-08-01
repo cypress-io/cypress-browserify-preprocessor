@@ -30,7 +30,7 @@ const defaultOptions = {
           plugins: ['babel-plugin-add-module-exports'].map(require.resolve),
           // babel-preset-env supports any JS that's stage-4, meaning it's
           // completely finalized in the ECMA standard
-          presets: ['babel-preset-env', 'babel-preset-react'].map(require.resolve),
+          presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve),
         },
       ],
     ],
