@@ -42,21 +42,17 @@
     "ban-sensitive-files": "1.9.2",
     "chai": "4.1.2",
     "chokidar-cli": "1.2.0",
-    "condition-circle": "2.0.1",
     "dependency-check": "3.2.0",
     "deps-ok": "1.4.1",
-    "dont-crack": "1.2.1",
     "eslint": "5.2.0",
     "eslint-plugin-cypress-dev": "1.1.2",
     "eslint-plugin-mocha": "5.1.0",
-    "github-post-release": "1.13.1",
     "husky": "0.14.3",
     "license-checker": "20.2.0",
     "mocha": "5.2.0",
     "mockery": "2.1.0",
     "nsp": "3.2.1",
-    "semantic-release": "8.2.3",
-    "simple-commit-message": "4.0.3",
+    "semantic-release": "15.9.3",
     "sinon": "6.1.4",
     "sinon-chai": "3.2.0",
     "snap-shot-it": "5.0.1"
@@ -75,12 +71,14 @@
     "watchify": "3.11.0"
   },
   "release": {
-    "verifyConditions": "condition-circle",
-    "analyzeCommits": "simple-commit-message",
-    "generateNotes": "github-post-release",
-    "verifyRelease": {
-      "path": "dont-crack",
-      "test-against": []
+    "analyzeCommits": {
+      "preset": "angular",
+      "releaseRules": [
+        {
+          "type": "break",
+          "release": "major"
+        }
+      ]
     }
   }
 }
