@@ -59,8 +59,12 @@
   },
   "dependencies": {
     "@babel/core": "7.0.0-beta.55",
+    "@babel/plugin-proposal-class-properties": "7.0.0-beta.55",
+    "@babel/plugin-proposal-object-rest-spread": "7.0.0-beta.55",
+    "@babel/plugin-transform-runtime": "7.0.0-beta.55",
     "@babel/preset-env": "7.0.0-beta.55",
     "@babel/preset-react": "7.0.0-beta.55",
+    "@babel/runtime": "7.0.0-beta.55",
     "babel-plugin-add-module-exports": "0.2.1",
     "babelify": "9.0.0",
     "bluebird": "3.5.1",
