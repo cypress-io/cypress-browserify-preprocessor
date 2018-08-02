@@ -79,8 +79,16 @@ If you pass one of the top-level options in (`extensions`, `transform`, etc), it
       {
         ast: false,
         babelrc: false,
-        plugins: ['babel-plugin-add-module-exports'],
-        presets: ['@babel/preset-env', '@babel/preset-react']
+        plugins: [
+          'babel-plugin-add-module-exports'
+          '@babel/plugin-proposal-class-properties',
+          '@babel/plugin-proposal-object-rest-spread',
+          '@babel/plugin-transform-runtime',
+          ],
+        presets: [
+          '@babel/preset-env',
+          '@babel/preset-react',
+        ]
       },
     ]
   ],

@@ -27,10 +27,20 @@ const defaultOptions = {
           ast: false,
           babelrc: false,
           // irons out differents between ES6 modules and node exports
-          plugins: ['babel-plugin-add-module-exports'].map(require.resolve),
-          // babel-preset-env supports any JS that's stage-4, meaning it's
-          // completely finalized in the ECMA standard
-          presets: ['@babel/preset-env', '@babel/preset-react'].map(require.resolve),
+          plugins: [
+            ...[
+              'babel-plugin-add-module-exports',
+              '@babel/plugin-proposal-class-properties',
+              '@babel/plugin-proposal-object-rest-spread',
+            ].map(require.resolve),
+            [require.resolve('@babel/plugin-transform-runtime'), {
+              moduleName: path.dirname(require.resolve('@babel/runtime/package')),
+            }],
+          ],
+          presets: [
+            '@babel/preset-env',
+            '@babel/preset-react',
+          ].map(require.resolve),
         },
       ],
     ],
