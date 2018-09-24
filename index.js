@@ -34,7 +34,7 @@ const defaultOptions = {
               '@babel/plugin-proposal-object-rest-spread',
             ].map(require.resolve),
             [require.resolve('@babel/plugin-transform-runtime'), {
-              moduleName: path.dirname(require.resolve('@babel/runtime/package')),
+              absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
             }],
           ],
           presets: [
