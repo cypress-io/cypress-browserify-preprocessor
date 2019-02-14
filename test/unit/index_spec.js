@@ -113,7 +113,7 @@ describe('browserify preprocessor', function () {
 
       it('specifies default extensions if none provided', function () {
         return this.run().then(() => {
-          expect(browserify.lastCall.args[0].extensions).to.eql(['.js', '.jsx', '.coffee', '.cjsx'])
+          expect(browserify.lastCall.args[0].extensions).to.eql(['.js', '.jsx', '.coffee'])
         })
       })
 

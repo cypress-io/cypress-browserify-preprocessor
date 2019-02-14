@@ -11,14 +11,14 @@ const debug = require('debug')('cypress:browserify')
 
 const bundles = {}
 
-// by default, we transform JavaScript (up to anything at stage-4), JSX,
-// CoffeeScript, and CJSX (CoffeeScript + JSX)
+// by default, we transform JavaScript (including some proposal features),
+// JSX, & CoffeeScript
 const defaultOptions = {
   browserifyOptions: {
-    extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
+    extensions: ['.js', '.jsx', '.coffee'],
     transform: [
       [
-        require.resolve('./cjsxify'),
+        require.resolve('coffeeify'),
         {},
       ],
       [
