@@ -11,14 +11,14 @@ const debug = require('debug')('cypress:browserify')
 
 const bundles = {}
 
-// by default, we transform JavaScript (up to anything at stage-4), JSX,
-// CoffeeScript, and CJSX (CoffeeScript + JSX)
+// by default, we transform JavaScript (including some proposal features),
+// JSX, & CoffeeScript
 const defaultOptions = {
   browserifyOptions: {
-    extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
+    extensions: ['.js', '.jsx', '.coffee'],
     transform: [
       [
-        require.resolve('./cjsxify'),
+        require.resolve('coffeeify'),
         {},
       ],
       [
@@ -81,6 +81,7 @@ const preprocessor = (options = {}) => {
   // the supported file and spec file to be requested again
   return (file) => {
     const filePath = file.filePath
+
     debug('get:', filePath)
 
     // since this function can get called multiple times with the same
@@ -88,6 +89,7 @@ const preprocessor = (options = {}) => {
     // since we don't want or need to re-initiate browserify/watchify for it
     if (bundles[filePath]) {
       debug('already have bundle for:', filePath)
+
       return bundles[filePath]
     }
 
@@ -123,6 +125,7 @@ const preprocessor = (options = {}) => {
     // yield the bundle if onBundle is specified so the user can modify it
     // as need via `bundle.external()`, `bundle.plugin()`, etc
     const onBundle = options.onBundle
+
     if (typeof onBundle === 'function') {
       onBundle(bundler)
     }
@@ -145,6 +148,7 @@ const preprocessor = (options = {}) => {
         }
 
         const ws = fs.createWriteStream(outputPath)
+
         ws.on('finish', () => {
           debug('finished bundling:', outputPath)
           resolve(outputPath)
@@ -168,6 +172,7 @@ const preprocessor = (options = {}) => {
         debug('- update finished for:', filePath)
         file.emit('rerun')
       })
+
       bundles[filePath] = bundlePromise
       // we suppress unhandled rejections so they don't bubble up to the
       // unhandledRejection handler and crash the app. Cypress will eventually

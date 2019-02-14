@@ -60,7 +60,7 @@ browserify({
 })
 ```
 
-If you pass one of the top-level options in (`extensions`, `transform`, etc), it will override the default. In the above example, browserify will process `.js` and `.ts` files, but not `.jsx`, `.coffee`, or `.cjsx`. If you wish to add to or modify existing options, read about [modifying the default options](#modifying-default-options).
+If you pass one of the top-level options in (`extensions`, `transform`, etc), it will override the default. In the above example, browserify will process `.js` and `.ts` files, but not `.jsx` or `.coffee`. If you wish to add to or modify existing options, read about [modifying the default options](#modifying-default-options).
 
 [watchify](https://github.com/browserify/watchify) is automatically configured as a plugin (as needed), so it's not necessary to manually specify it.
 
@@ -68,10 +68,10 @@ If you pass one of the top-level options in (`extensions`, `transform`, etc), it
 
 ```javascript
 {
-  extensions: ['.js', '.jsx', '.coffee', '.cjsx'],
+  extensions: ['.js', '.jsx', '.coffee'],
   transform: [
     [
-      'cjsxify',
+      'coffeeify',
       {}
     ],
     [
