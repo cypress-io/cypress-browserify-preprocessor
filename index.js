@@ -4,6 +4,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const fs = require('./fs')
 
+const cloneDeep = require('lodash.clonedeep')
 const browserify = require('browserify')
 const watchify = require('watchify')
 
@@ -26,10 +27,9 @@ const defaultOptions = {
         {
           ast: false,
           babelrc: false,
-          // irons out differents between ES6 modules and node exports
           plugins: [
             ...[
-              'babel-plugin-add-module-exports',
+              'babel-plugin-add-module-exports', // irons out differences between ES6 modules and node exports
               '@babel/plugin-proposal-class-properties',
               '@babel/plugin-proposal-object-rest-spread',
             ].map(require.resolve),
@@ -58,6 +58,32 @@ const defaultOptions = {
       '**/node_modules/**',
     ],
   },
+}
+
+const getBrowserifyOptions = (entry, userBrowserifyOptions = {}) => {
+  let browserifyOptions = cloneDeep(defaultOptions.browserifyOptions)
+
+  // allow user to override default options
+  browserifyOptions = Object.assign(browserifyOptions, userBrowserifyOptions, {
+    // these must always be new objects or 'update' events will not fire
+    cache: {},
+    packageCache: {},
+  })
+
+  // unless user has explicitly turned off source map support, always enable it
+  // so we can use it to point user to the source code
+  if (userBrowserifyOptions.debug !== false) {
+    browserifyOptions.debug = true
+  }
+
+  // we need to override and control entries
+  Object.assign(browserifyOptions, {
+    entries: [entry],
+  })
+
+  debug('browserifyOptions: %o', browserifyOptions)
+
+  return browserifyOptions
 }
 
 // export a function that returns another function, making it easy for users
@@ -101,20 +127,9 @@ const preprocessor = (options = {}) => {
     debug('input:', filePath)
     debug('output:', outputPath)
 
-    // allow user to override default options
-    const browserifyOptions = Object.assign({}, defaultOptions.browserifyOptions, options.browserifyOptions, {
-      // these must always be new objects or 'update' events will not fire
-      cache: {},
-      packageCache: {},
-    })
+    const browserifyOptions = getBrowserifyOptions(filePath, options.browserifyOptions)
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
-    // we need to override and control entries
-    Object.assign(browserifyOptions, {
-      entries: [filePath],
-    })
-
-    debug('browserifyOptions %o:', browserifyOptions)
     const bundler = browserify(browserifyOptions)
 
     if (file.shouldWatch) {

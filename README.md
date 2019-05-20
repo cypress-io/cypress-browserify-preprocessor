@@ -64,6 +64,8 @@ If you pass one of the top-level options in (`extensions`, `transform`, etc), it
 
 [watchify](https://github.com/browserify/watchify) is automatically configured as a plugin (as needed), so it's not necessary to manually specify it.
 
+Source maps are always enabled unless explicitly disabled by specifying `debug: false`.
+
 **Default**:
 
 ```javascript
@@ -92,6 +94,7 @@ If you pass one of the top-level options in (`extensions`, `transform`, etc), it
       },
     ]
   ],
+  debug: true,
   plugin: [],
   cache: {},
   packageCache: {}
