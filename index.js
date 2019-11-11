@@ -133,6 +133,7 @@ const preprocessor = (options = {}, decorator = undefined) => {
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
     const bundler = browserify(browserifyOptions)
+
     if (decorator) {
       decorator(bundler)
     }
