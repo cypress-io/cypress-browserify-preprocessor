@@ -91,7 +91,9 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}) => {
 //
 // on('file:preprocessor', browserify(options))
 //
-const preprocessor = (options = {}) => {
+// the decorator function will be called with the Browserify instance
+//
+const preprocessor = (options = {}, decorator = undefined) => {
   debug('received user options: %o', options)
 
   // we return function that accepts the arguments provided by
@@ -131,6 +133,9 @@ const preprocessor = (options = {}) => {
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
     const bundler = browserify(browserifyOptions)
+    if (decorator) {
+      decorator(bundler)
+    }
 
     if (file.shouldWatch) {
       debug('watching')

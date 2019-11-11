@@ -58,8 +58,8 @@ describe('browserify preprocessor', function () {
       emit: sandbox.spy(),
     }
 
-    this.run = () => {
-      return preprocessor(this.options)(this.file)
+    this.run = (decorator) => {
+      return preprocessor(this.options, decorator)(this.file)
     }
   })
 
@@ -89,6 +89,16 @@ describe('browserify preprocessor', function () {
           expect(browserify).to.be.called
         })
       })
+
+      it('browserify can be decorated', function () {
+        const decorator = sandbox.spy();
+
+        return this.run(decorator).then(() => {
+          expect(browserify).to.be.called
+          expect(decorator).to.be.called
+        })
+
+      });
 
       it('returns existing bundle if called again with same filePath', function () {
         browserify.reset()
