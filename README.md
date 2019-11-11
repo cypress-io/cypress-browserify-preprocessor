@@ -32,7 +32,7 @@ module.exports = (on) => {
 
 ## Options
 
-Pass in options as the second argument to `browserify`:
+Pass in options as the first argument to `browserify`:
 
 ```javascript
 module.exports = (on) => {
@@ -163,6 +163,28 @@ module.exports = (on) => {
   on('file:preprocessor', browserify(options))
 }
 ```
+
+## Decoratoring the Browserify instance
+
+Pass in a decorator function as the second argument to `browserify`:
+
+```javascript
+module.exports = (on) => {
+  const options = {
+    // options here
+  }
+
+  const decorator = (b) => {
+    // b is the instance of Browserify.
+    // You can call any of the [methods](https://github.com/browserify/browserify#methods)
+    // on b that you need in order to further customize Browserify
+    b.ignoreFile('module-to-ignore')
+  };
+
+  on('file:preprocessor', browserify(options, decorator))
+}
+```
+
 
 ## Contributing
 
