@@ -133,7 +133,7 @@ browserify({
 
 ### onBundle
 
-A function that is called with the [browserify bundle](https://github.com/browserify/browserify#browserifyfiles--opts). This allows you to specify external files and plugins. See the [browserify docs](https://github.com/browserify/browserify#baddfile-opts) for methods available.
+A function that is called with the [browserify instance](https://github.com/browserify/browserify#browserifyfiles--opts). This allows you to specify external files and plugins. See the [browserify docs](https://github.com/browserify/browserify#baddfile-opts) for methods available.
 
 ```javascript
 // example
@@ -141,6 +141,7 @@ browserify({
   onBundle (bundle) {
     bundle.external('react')
     bundle.plugin('some-plugin')
+    bundle.ignore('pg-native')
   }
 })
 ```
