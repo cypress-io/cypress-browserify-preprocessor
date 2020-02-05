@@ -35,11 +35,18 @@ describe('browserify preprocessor - e2e', function () {
 
 describe('imports and exports', () => {
   it('handles imports and exports', () => {
-
     return bundle('math_spec.js').then((output) => {
       // check that bundled tests work
       eval(output)
       snapshot('math default exports', output)
+    })
+  })
+
+  it('handles module.exports and import', () => {
+    return bundle('sub_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+      snapshot('sub import', output)
     })
   })
 })
