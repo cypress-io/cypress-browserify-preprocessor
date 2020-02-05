@@ -49,4 +49,12 @@ describe('imports and exports', () => {
       snapshot('sub import', output)
     })
   })
+
+  it('handles module.exports and default import', () => {
+    return bundle('mul_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+      snapshot('mul import', output)
+    })
+  })
 })
