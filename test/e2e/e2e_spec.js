@@ -60,4 +60,11 @@ describe('imports and exports', () => {
       // so as long as eval works, do not snapshot it
     })
   })
+
+  it('handles default string import', () => {
+    return bundle('dom_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+    })
+  })
 })
