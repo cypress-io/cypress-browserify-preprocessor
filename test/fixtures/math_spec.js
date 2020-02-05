@@ -1,4 +1,7 @@
-import { add } from './math'
+// math exports default object
+// so if we want a property, first we need to grab the default
+import math from './math'
+const {add} = math
 
 context('math.js', function () {
   it('imports function', () => {

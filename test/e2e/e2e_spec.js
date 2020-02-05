@@ -38,9 +38,16 @@ describe('imports and exports', () => {
     return bundle('math_spec.js').then((output) => {
       // check that bundled tests work
       eval(output)
-      snapshot('math default exports', output)
     })
   })
+
+  it('named ES6', () => {
+    return bundle('divide_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+    })
+  })
+
 
   it('handles module.exports and import', () => {
     return bundle('sub_spec.js').then((output) => {
@@ -58,6 +65,13 @@ describe('imports and exports', () => {
       // to interop require module
       // which on CI generates different path.
       // so as long as eval works, do not snapshot it
+    })
+  })
+
+  it('handles default string import', () => {
+    return bundle('dom_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
     })
   })
 })
