@@ -161,6 +161,10 @@ module.exports = (on) => {
 }
 ```
 
+## Debugging
+
+Execute code with `DEBUG=cypress:browserify` environment variable.
+
 ## Contributing
 
 Run all tests once:

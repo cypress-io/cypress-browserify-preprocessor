@@ -245,6 +245,24 @@ describe('browserify preprocessor', function () {
           expect(this.bundlerApi.close).not.to.be.called
         })
       })
+
+      describe('source maps', () => {
+        describe('browerifyOptions.debug', function () {
+          it.skip('true by default', function () {
+            return this.run().then(() => {
+              expect(browserify.lastCall.args[0].debug).to.be.true
+            })
+          })
+
+          it('false if user has explicitly set to false', function () {
+            this.options.browserifyOptions = { debug: false }
+
+            return this.run().then(() => {
+              expect(browserify.lastCall.args[0].debug).to.be.false
+            })
+          })
+        })
+      })
     })
 
     describe('when it errors', function () {
