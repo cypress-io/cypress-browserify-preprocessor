@@ -37,11 +37,8 @@ describe('imports and exports', () => {
   it('handles imports and exports', () => {
 
     return bundle('math_spec.js').then((output) => {
-      /* eslint-disable-next-line no-console */
-      console.log(output)
       // check that bundled tests work
       eval(output)
-      // TODO: update snapshot after `eval` works
       snapshot('math default exports', output)
     })
   })
