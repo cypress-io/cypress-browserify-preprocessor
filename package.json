@@ -26,7 +26,7 @@
     "ban": "ban",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "eslint --fix *.js",
+    "lint": "eslint --fix '*.js' 'test/unit/*.js' 'test/e2e/*.js'",
     "secure": "nsp check",
     "size": "t=\"$(npm pack .)\"; wc -c \"${t}\"; tar tvf \"${t}\"; rm \"${t}\";",
     "precommit": "npm run lint",

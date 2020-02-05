@@ -272,6 +272,7 @@ describe('browserify preprocessor', function () {
 
           it('false if user has explicitly set to false', function () {
             this.options.browserifyOptions = { debug: false }
+
             return this.run().then(() => {
               expect(browserify.lastCall.args[0].debug).to.be.false
             })
