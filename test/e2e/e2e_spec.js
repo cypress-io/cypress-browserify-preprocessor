@@ -4,18 +4,23 @@ const snapshot = require('snap-shot-it')
 const fs = require('../../fs')
 const preprocessor = require('../../index')
 
-describe('browserify preprocessor - e2e', function () {
+beforeEach(function () {
+  fs.removeSync(path.join(__dirname, '_test-output'))
+})
+
+const bundle = (fixtureName) => {
   const on = () => {}
-
-  beforeEach(function () {
-    fs.removeSync(path.join(__dirname, '_test-output'))
-  })
-
-  it('correctly preprocesses the file', function () {
-    const filePath = path.join(__dirname, '..', 'fixtures', 'example_spec.js')
+  const filePath = path.join(__dirname, '..', 'fixtures', fixtureName)
     const outputPath = path.join(__dirname, '..', '_test-output', 'output.js')
     return preprocessor()({ filePath, outputPath, on }).then(() => {
-      snapshot(fs.readFileSync(outputPath).toString())
+      return fs.readFileSync(outputPath).toString()
+    })
+}
+
+describe('browserify preprocessor - e2e', function () {
+  it('correctly preprocesses the file', function () {
+    return bundle('example_spec.js').then(output => {
+      snapshot(output)
     })
   })
 })
