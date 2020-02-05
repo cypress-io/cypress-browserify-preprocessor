@@ -1,8 +1,12 @@
+const chai = require('chai')
 const path = require('path')
 const snapshot = require('snap-shot-it')
 
 const fs = require('../../fs')
 const preprocessor = require('../../index')
+
+/* eslint-disable-next-line no-unused-vars */
+const expect = chai.expect
 
 beforeEach(function () {
   fs.removeSync(path.join(__dirname, '_test-output'))
@@ -31,6 +35,8 @@ describe('imports and exports', () => {
     // do not generate source maps
     return bundle('math_spec.js', { browserifyOptions: { debug: false } }).then((output) => {
       snapshot('math default exports', output)
+      // now check that bundled tests work
+      eval(output)
     })
   })
 })
