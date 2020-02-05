@@ -33,8 +33,10 @@ describe('imports and exports', () => {
   it('handles imports and exports', () => {
     // do not generate source maps
     return bundle('math_spec.js', { browserifyOptions: { debug: false } }).then((output) => {
+      /* eslint-disable-next-line no-console */
+      console.log(output)
       eval(output)
-      // snapshot('math default exports', output)
+      snapshot('math default exports', output)
     })
   })
 })
