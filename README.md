@@ -1,4 +1,4 @@
-# Cypress Browserify Preprocessor
+# Cypress Browserify Preprocessor [![CircleCI](https://circleci.com/gh/cypress-io/cypress-browserify-preprocessor/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-browserify-preprocessor/tree/master)
 
 Cypress preprocessor for bundling JavaScript via browserify.
 
