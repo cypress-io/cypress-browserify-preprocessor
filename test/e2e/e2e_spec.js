@@ -35,11 +35,29 @@ describe('browserify preprocessor - e2e', function () {
 
 describe('imports and exports', () => {
   it('handles imports and exports', () => {
-
     return bundle('math_spec.js').then((output) => {
       // check that bundled tests work
       eval(output)
       snapshot('math default exports', output)
+    })
+  })
+
+  it('handles module.exports and import', () => {
+    return bundle('sub_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+      snapshot('sub import', output)
+    })
+  })
+
+  it('handles module.exports and default import', () => {
+    return bundle('mul_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+      // for some reason, this bundle included full resolved path
+      // to interop require module
+      // which on CI generates different path.
+      // so as long as eval works, do not snapshot it
     })
   })
 })
