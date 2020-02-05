@@ -33,11 +33,6 @@ const defaultOptions = {
               '@babel/plugin-proposal-class-properties',
               '@babel/plugin-proposal-object-rest-spread',
             ].map(require.resolve),
-            // irons out differences between ES6 modules and node exports
-            // https://github.com/59naga/babel-plugin-add-module-exports
-            // [require.resolve('babel-plugin-add-module-exports'), {
-            //   'addDefaultProperty': true,
-            // }],
             [require.resolve('@babel/plugin-transform-runtime'), {
               absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
             }],
