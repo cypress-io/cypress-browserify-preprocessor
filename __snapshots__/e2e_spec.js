@@ -28,6 +28,8 @@ var _default = {
   }
 };
 exports["default"] = _default;
+module.exports = exports.default;
+module.exports.default = exports.default;
 
 },{}],2:[function(require,module,exports){
 "use strict";
