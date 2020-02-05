@@ -12,7 +12,10 @@ beforeEach(function () {
   fs.removeSync(path.join(__dirname, '_test-output'))
 })
 
-const bundle = (fixtureName, options) => {
+// do not generate source maps by default
+const DEFAULT_OPTIONS = { browserifyOptions: { debug: false } }
+
+const bundle = (fixtureName, options = DEFAULT_OPTIONS) => {
   const on = () => {}
   const filePath = path.join(__dirname, '..', 'fixtures', fixtureName)
   const outputPath = path.join(__dirname, '..', '_test-output', 'output.js')
@@ -32,11 +35,14 @@ describe('browserify preprocessor - e2e', function () {
 
 describe('imports and exports', () => {
   it('handles imports and exports', () => {
-    // do not generate source maps
-    return bundle('math_spec.js', { browserifyOptions: { debug: false } }).then((output) => {
-      snapshot('math default exports', output)
-      // now check that bundled tests work
+
+    return bundle('math_spec.js').then((output) => {
+      /* eslint-disable-next-line no-console */
+      console.log(output)
+      // check that bundled tests work
       eval(output)
+      // TODO: update snapshot after `eval` works
+      snapshot('math default exports', output)
     })
   })
 })
