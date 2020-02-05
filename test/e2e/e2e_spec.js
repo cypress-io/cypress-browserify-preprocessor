@@ -54,7 +54,10 @@ describe('imports and exports', () => {
     return bundle('mul_spec.js').then((output) => {
       // check that bundled tests work
       eval(output)
-      snapshot('mul import', output)
+      // for some reason, this bundle included full resolved path
+      // to interop require module
+      // which on CI generates different path.
+      // so as long as eval works, do not snapshot it
     })
   })
 })
