@@ -38,9 +38,16 @@ describe('imports and exports', () => {
     return bundle('math_spec.js').then((output) => {
       // check that bundled tests work
       eval(output)
-      snapshot('math default exports', output)
     })
   })
+
+  it('named ES6', () => {
+    return bundle('divide_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+    })
+  })
+
 
   it('handles module.exports and import', () => {
     return bundle('sub_spec.js').then((output) => {

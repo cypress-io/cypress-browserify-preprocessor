@@ -1,4 +1,4 @@
-const dom = require('./dom')
+const dom = require('./dom').default
 
 context('imports default string', function () {
   it('works', () => {

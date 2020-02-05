@@ -1,1 +1,1 @@
-export default "dom"
+export default 'dom'
