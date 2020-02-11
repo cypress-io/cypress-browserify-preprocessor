@@ -74,4 +74,11 @@ describe('imports and exports', () => {
       eval(output)
     })
   })
+
+  it('handles non-top-level require', () => {
+    return bundle('require_spec.js').then((output) => {
+      // check that bundled tests work
+      eval(output)
+    })
+  })
 })

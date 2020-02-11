@@ -29,7 +29,7 @@ const defaultOptions = {
           babelrc: false,
           plugins: [
             ...[
-              '@babel/plugin-transform-modules-commonjs',
+              'babel-plugin-add-module-exports',
               '@babel/plugin-proposal-class-properties',
               '@babel/plugin-proposal-object-rest-spread',
             ].map(require.resolve),
