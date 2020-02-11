@@ -82,7 +82,7 @@ Source maps are always enabled unless explicitly disabled by specifying `debug: 
         ast: false,
         babelrc: false,
         plugins: [
-          'babel-plugin-add-module-exports',
+          '@babel/plugin-transform-modules-commonjs', 
           '@babel/plugin-proposal-class-properties',
           '@babel/plugin-proposal-object-rest-spread',
           '@babel/plugin-transform-runtime',
