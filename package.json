@@ -55,7 +55,8 @@
     "semantic-release": "15.13.15",
     "sinon": "7.2.3",
     "sinon-chai": "3.3.0",
-    "snap-shot-it": "7.9.2"
+    "snap-shot-it": "7.9.2",
+    "typescript": "3.8.3"
   },
   "dependencies": {
     "@babel/core": "7.4.5",
