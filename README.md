@@ -146,6 +146,16 @@ browserify({
 })
 ```
 
+### typescript
+
+When the path to the TypeScript package is given, Cypress will automatically transpile `.ts` spec, plugin, support files. Note that this **DOES NOT** check types.
+
+```javascript
+browserify({
+  typescript: require.resolve('typescript')
+})
+```
+
 **Default**: `undefined`
 
 ## Modifying default options
