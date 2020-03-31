@@ -60,7 +60,7 @@ const defaultOptions = {
   },
 }
 
-const getBrowserifyOptions = (entry, userBrowserifyOptions = {}) => {
+const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath = null) => {
   let browserifyOptions = cloneDeep(defaultOptions.browserifyOptions)
 
   // allow user to override default options
@@ -80,6 +80,18 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}) => {
   Object.assign(browserifyOptions, {
     entries: [entry],
   })
+
+  if (typescriptPath) {
+    browserifyOptions.extensions.push('.ts', '.tsx')
+    // remove babelify setting
+    browserifyOptions.transform.pop()
+    // add typescript compiler
+    browserifyOptions.transform.push([
+      path.join(__dirname, './simple_tsify'), {
+        typescript: require(typescriptPath),
+      },
+    ])
+  }
 
   debug('browserifyOptions: %o', browserifyOptions)
 
@@ -127,7 +139,7 @@ const preprocessor = (options = {}) => {
     debug('input:', filePath)
     debug('output:', outputPath)
 
-    const browserifyOptions = getBrowserifyOptions(filePath, options.browserifyOptions)
+    const browserifyOptions = getBrowserifyOptions(filePath, options.browserifyOptions, options.typescript)
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
     const bundler = browserify(browserifyOptions)
