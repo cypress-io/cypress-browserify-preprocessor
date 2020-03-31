@@ -33,6 +33,21 @@ describe('browserify preprocessor - e2e', function () {
   })
 })
 
+describe('typescript', function () {
+  it('handles typescript when the path is given', function () {
+    return bundle('math_spec.ts', {
+      typescript: require.resolve('typescript'),
+    }).then((output) => {
+      // check that bundled tests work
+      eval(output)
+    })
+  })
+
+  it('cannot handle typescript when the path is not given', function () {
+    expect(() => bundle('math_spec.ts')).to.throw
+  })
+})
+
 describe('imports and exports', () => {
   it('handles imports and exports', () => {
     return bundle('math_spec.js').then((output) => {
