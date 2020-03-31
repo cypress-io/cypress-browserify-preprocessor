@@ -34,7 +34,7 @@ describe('browserify preprocessor - e2e', function () {
 })
 
 describe('typescript', function () {
-  it('handles typescript when the path is given', function () {
+  it('handles .ts file when the path is given', function () {
     return bundle('math_spec.ts', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
@@ -43,8 +43,21 @@ describe('typescript', function () {
     })
   })
 
-  it('cannot handle typescript when the path is not given', function () {
+  it('handles .tsx file when the path is given', function () {
+    return bundle('math_spec.ts', {
+      typescript: require.resolve('typescript'),
+    }).then((output) => {
+      // check that bundled tests work
+      eval(output)
+    })
+  })
+
+  it('cannot handle .ts file when the path is not given', function () {
     expect(() => bundle('math_spec.ts')).to.throw
+  })
+
+  it('cannot handle .tsx file when the path is not given', function () {
+    expect(() => bundle('math_spec.tsx')).to.throw
   })
 })
 
