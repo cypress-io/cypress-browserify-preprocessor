@@ -82,9 +82,17 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath 
   })
 
   if (typescriptPath) {
+    const transform = browserifyOptions.transform
+    const hasTsifyTransform = transform.some(([name]) => name.includes('tsify'))
+    const hastsifyPlugin = browserifyOptions.plugin.includes('tsify')
+
+    if (hasTsifyTransform || hastsifyPlugin) {
+      throw new Error('We see you passed the typescript option and also passed a browserify transform for TypeScript. Please only do one or the other.')
+    }
+
     browserifyOptions.extensions.push('.ts', '.tsx')
     // remove babelify setting
-    browserifyOptions.transform.pop()
+    browserifyOptions.transform = transform.filter(([name]) => !name.includes('babelify'))
     // add typescript compiler
     browserifyOptions.transform.push([
       path.join(__dirname, './simple_tsify'), {

@@ -44,7 +44,7 @@ describe('typescript', function () {
   })
 
   it('handles .tsx file when the path is given', function () {
-    return bundle('math_spec.ts', {
+    return bundle('math_spec.tsx', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
       // check that bundled tests work
@@ -52,12 +52,22 @@ describe('typescript', function () {
     })
   })
 
-  it('cannot handle .ts file when the path is not given', function () {
-    expect(() => bundle('math_spec.ts')).to.throw
-  })
+  it('babelify is removed even if it is not the last item', () => {
+    const { browserifyOptions } = preprocessor.defaultOptions
 
-  it('cannot handle .tsx file when the path is not given', function () {
-    expect(() => bundle('math_spec.tsx')).to.throw
+    return bundle('math_spec2.ts', {
+      browserifyOptions: {
+        ...browserifyOptions,
+        transform: [
+          browserifyOptions.transform[1],
+          browserifyOptions.transform[0],
+        ],
+      },
+      typescript: require.resolve('typescript'),
+    }).then((output) => {
+      // check that bundled tests work
+      eval(output)
+    })
   })
 })
 
