@@ -10,6 +10,10 @@ const isJson = (code) => {
   return true
 }
 
+// tsify doesn't have transpile-only option like ts-node or ts-loader.
+// It means it should check types whenever spec file is changed
+// and it slows down the test speed a lot.
+// We skip this slow type-checking process by using transpileModule() api.
 module.exports = function (b, opts) {
   const chunks = []
 
