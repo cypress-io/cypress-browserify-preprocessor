@@ -54,68 +54,6 @@ describe('typescript', () => {
       eval(output)
     })
   })
-
-  it('babelify is removed even if it is not the last item', () => {
-    const { browserifyOptions } = preprocessor.defaultOptions
-
-    return bundle('typescript/math_spec.ts', {
-      browserifyOptions: {
-        ...browserifyOptions,
-        transform: [
-          browserifyOptions.transform[1],
-          browserifyOptions.transform[0],
-        ],
-      },
-      typescript: require.resolve('typescript'),
-    }).then((output) => {
-      // check that bundled tests work
-      eval(output)
-    })
-  })
-
-  describe('throws errors when typescript path and tsify are given together', () => {
-    it('plugin', () => {
-      expect(() => bundle('typescript/math_spec.ts', {
-        browserifyOptions: {
-          plugin: ['tsify'],
-        },
-        typescript: require.resolve('typescript'),
-      })).to.throw('This may cause conflicts')
-    })
-
-    it('transform', () => {
-      expect(() => bundle('typescript/math_spec.ts', {
-        browserifyOptions: {
-          transform: [
-            ['path/to/tsify', {}],
-          ],
-        },
-        typescript: require.resolve('typescript'),
-      })).to.throw('This may cause conflicts')
-    })
-  })
-
-  describe('typescript transpile failure', () => {
-    it('cannot handle .ts file when the path is not given', () => {
-      return bundle('typescript/math_spec.ts')
-      .then(() => {
-        throw new Error('Should reject with error and not resolve')
-      })
-      .catch((err) => {
-        expect(err.message).to.include('\'import\' and \'export\' may appear only with \'sourceType: module\'')
-      })
-    })
-
-    it('cannot handle .tsx file when the path is not given', () => {
-      return bundle('typescript/component.tsx')
-      .then(() => {
-        throw new Error('Should reject with error and not resolve')
-      })
-      .catch((err) => {
-        expect(err.message).to.include('\'import\' and \'export\' may appear only with \'sourceType: module\'')
-      })
-    })
-  })
 })
 
 describe('imports and exports', () => {

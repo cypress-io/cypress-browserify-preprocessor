@@ -23,6 +23,8 @@ const streamApi = {
 
 streamApi.on = sandbox.stub().returns(streamApi)
 
+process.env.__TESTING__ = true
+
 const fs = require('../../lib/fs')
 const preprocessor = require('../../index')
 
@@ -46,7 +48,6 @@ describe('browserify preprocessor', function () {
       on: sandbox.stub(),
     }
     sandbox.stub(fs, 'createWriteStream').returns(this.createWriteStreamApi)
-
     sandbox.stub(fs, 'ensureDirAsync').resolves()
 
     this.options = {}
@@ -75,8 +76,8 @@ describe('browserify preprocessor', function () {
   })
 
   describe('preprocessor function', function () {
-    afterEach(function () {
-      this.file.on.withArgs('close').yield() // resets the cached bundles
+    beforeEach(function () {
+      preprocessor.reset()
     })
 
     describe('when it finishes cleanly', function () {
@@ -348,6 +349,92 @@ describe('browserify preprocessor', function () {
         })
         .catch((err) => {
           expect(err.message).to.contain('bundle error')
+        })
+      })
+    })
+
+    describe('typescript support', function () {
+      beforeEach(function () {
+        this.options.typescript = require.resolve('typescript')
+      })
+
+      it('adds tsify transform', function () {
+        this.createWriteStreamApi.on.withArgs('finish').yields()
+
+        return this.run().then(() => {
+          expect(browserify.lastCall.args[0].transform[1][0]).to.include('simple_tsify')
+        })
+      })
+
+      it('adds to extensions', function () {
+        this.createWriteStreamApi.on.withArgs('finish').yields()
+
+        return this.run().then(() => {
+          expect(browserify.lastCall.args[0].extensions).to.eql(['.js', '.jsx', '.coffee', '.ts', '.tsx'])
+        })
+      })
+
+      it('removes babelify transform', function () {
+        this.createWriteStreamApi.on.withArgs('finish').yields()
+
+        return this.run().then(() => {
+          const transforms = browserify.lastCall.args[0].transform
+
+          expect(transforms).to.have.length(2)
+          expect(transforms[1][0]).not.to.include('babelify')
+        })
+      })
+
+      it('does not change browserify options without typescript option', function () {
+        this.createWriteStreamApi.on.withArgs('finish').yields()
+
+        this.options.typescript = undefined
+
+        return this.run().then(() => {
+          expect(browserify.lastCall.args[0].transform[1][0]).to.include('babelify')
+          expect(browserify.lastCall.args[0].transform[1][0]).not.to.include('simple_tsify')
+          expect(browserify.lastCall.args[0].extensions).to.eql(['.js', '.jsx', '.coffee'])
+        })
+      })
+
+      it('removes babelify transform even if it is not the last item', function () {
+        this.createWriteStreamApi.on.withArgs('finish').yields()
+
+        const { browserifyOptions } = preprocessor.defaultOptions
+
+        this.options.browserifyOptions = {
+          ...browserifyOptions,
+          transform: [
+            browserifyOptions.transform[1],
+            browserifyOptions.transform[0],
+          ],
+        }
+
+        return this.run().then(() => {
+          const transforms = browserify.lastCall.args[0].transform
+
+          expect(transforms).to.have.length(2)
+          expect(transforms[1][0]).not.to.include('babelify')
+        })
+      })
+
+      describe('when typescript path and tsify are given together', function () {
+        it('throws error when it is a plugin', function () {
+          this.options.browserifyOptions = {
+            plugin: ['tsify'],
+          }
+
+          expect(this.run).to.throw('This may cause conflicts')
+        })
+
+        it('throws error when it is a transform', function () {
+          this.options.browserifyOptions = {
+            transform: [
+              ['path/to/tsify', {}],
+            ],
+          }
+
+          expect(this.run).to.throw('This may cause conflicts')
         })
       })
     })
