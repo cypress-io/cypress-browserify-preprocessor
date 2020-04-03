@@ -80,7 +80,7 @@ describe('typescript', () => {
           plugin: ['tsify'],
         },
         typescript: require.resolve('typescript'),
-      })).to.throw('Please only do one or the other.')
+      })).to.throw('This may cause conflicts')
     })
 
     it('transform', () => {
@@ -91,7 +91,7 @@ describe('typescript', () => {
           ],
         },
         typescript: require.resolve('typescript'),
-      })).to.throw('Please only do one or the other.')
+      })).to.throw('This may cause conflicts')
     })
   })
 

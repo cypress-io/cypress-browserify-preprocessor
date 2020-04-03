@@ -87,7 +87,15 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath 
     const hastsifyPlugin = browserifyOptions.plugin.includes('tsify')
 
     if (hasTsifyTransform || hastsifyPlugin) {
-      throw new Error('We see you passed the typescript option and also passed a browserify transform for TypeScript. Please only do one or the other.')
+      const type = hasTsifyTransform ? 'transform' : 'plugin'
+
+      throw new Error(`It looks like you passed the 'typescript' option and also specified a browserify ${type} for TypeScript. This may cause conflicts.
+
+Please do one of the following:
+
+  1) Pass in the 'typescript' option and omit the browserify ${type} (Recommmended)
+  2) Omit the 'typescript' option and continue to use your own browserify ${type}
+`)
     }
 
     browserifyOptions.extensions.push('.ts', '.tsx')
