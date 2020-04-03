@@ -242,4 +242,12 @@ const preprocessor = (options = {}) => {
 // provide a clone of the default options
 preprocessor.defaultOptions = JSON.parse(JSON.stringify(defaultOptions))
 
+if (process.env.__TESTING__) {
+  preprocessor.reset = () => {
+    for (let filePath in bundles) {
+      delete bundles[filePath]
+    }
+  }
+}
+
 module.exports = preprocessor

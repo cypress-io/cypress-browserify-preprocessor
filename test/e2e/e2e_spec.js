@@ -2,6 +2,8 @@ const chai = require('chai')
 const path = require('path')
 const snapshot = require('snap-shot-it')
 
+process.env.__TESTING__ = true
+
 const fs = require('../../lib/fs')
 const preprocessor = require('../../index')
 
@@ -10,6 +12,7 @@ const expect = chai.expect
 
 beforeEach(() => {
   fs.removeSync(path.join(__dirname, '_test-output'))
+  preprocessor.reset()
 })
 
 // do not generate source maps by default
@@ -72,7 +75,7 @@ describe('typescript', () => {
 
   describe('throws errors when typescript path and tsify are given together', () => {
     it('plugin', () => {
-      expect(() => bundle('typescript/test1.ts', {
+      expect(() => bundle('typescript/math_spec.ts', {
         browserifyOptions: {
           plugin: ['tsify'],
         },
@@ -81,7 +84,7 @@ describe('typescript', () => {
     })
 
     it('transform', () => {
-      expect(() => bundle('typescript/test2.ts', {
+      expect(() => bundle('typescript/math_spec.ts', {
         browserifyOptions: {
           transform: [
             ['path/to/tsify', {}],
@@ -94,9 +97,9 @@ describe('typescript', () => {
 
   describe('typescript transpile failure', () => {
     it('cannot handle .ts file when the path is not given', () => {
-      return bundle('typescript/test3.ts')
+      return bundle('typescript/math_spec.ts')
       .then(() => {
-        expect(true).to.eq('should not be here')
+        throw new Error('Should reject with error and not resolve')
       })
       .catch((err) => {
         expect(err.message).to.include('\'import\' and \'export\' may appear only with \'sourceType: module\'')
@@ -104,9 +107,9 @@ describe('typescript', () => {
     })
 
     it('cannot handle .tsx file when the path is not given', () => {
-      return bundle('typescript/test4.tsx')
+      return bundle('typescript/component.tsx')
       .then(() => {
-        expect(true).to.eq('should not be here')
+        throw new Error('Should reject with error and not resolve')
       })
       .catch((err) => {
         expect(err.message).to.include('\'import\' and \'export\' may appear only with \'sourceType: module\'')

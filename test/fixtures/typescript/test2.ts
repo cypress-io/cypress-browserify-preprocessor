@@ -1,1 +1,0 @@
-export const g = (a: number, b: number, c: number) => a + b + c
