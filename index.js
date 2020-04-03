@@ -2,7 +2,7 @@
 
 const path = require('path')
 const Promise = require('bluebird')
-const fs = require('./fs')
+const fs = require('./lib/fs')
 
 const cloneDeep = require('lodash.clonedeep')
 const browserify = require('browserify')
@@ -60,7 +60,7 @@ const defaultOptions = {
   },
 }
 
-const getBrowserifyOptions = (entry, userBrowserifyOptions = {}) => {
+const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath = null) => {
   let browserifyOptions = cloneDeep(defaultOptions.browserifyOptions)
 
   // allow user to override default options
@@ -80,6 +80,36 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}) => {
   Object.assign(browserifyOptions, {
     entries: [entry],
   })
+
+  if (typescriptPath) {
+    const transform = browserifyOptions.transform
+    const hasTsifyTransform = transform.some(([name]) => name.includes('tsify'))
+    const hastsifyPlugin = browserifyOptions.plugin.includes('tsify')
+
+    if (hasTsifyTransform || hastsifyPlugin) {
+      const type = hasTsifyTransform ? 'transform' : 'plugin'
+
+      throw new Error(`Error running @cypress/browserify-preprocessor:
+
+It looks like you passed the 'typescript' option and also specified a browserify ${type} for TypeScript. This may cause conflicts.
+
+Please do one of the following:
+
+1) Pass in the 'typescript' option and omit the browserify ${type} (Recommmended)
+2) Omit the 'typescript' option and continue to use your own browserify ${type}
+`)
+    }
+
+    browserifyOptions.extensions.push('.ts', '.tsx')
+    // remove babelify setting
+    browserifyOptions.transform = transform.filter(([name]) => !name.includes('babelify'))
+    // add typescript compiler
+    browserifyOptions.transform.push([
+      path.join(__dirname, './lib/simple_tsify'), {
+        typescript: require(typescriptPath),
+      },
+    ])
+  }
 
   debug('browserifyOptions: %o', browserifyOptions)
 
@@ -127,7 +157,7 @@ const preprocessor = (options = {}) => {
     debug('input:', filePath)
     debug('output:', outputPath)
 
-    const browserifyOptions = getBrowserifyOptions(filePath, options.browserifyOptions)
+    const browserifyOptions = getBrowserifyOptions(filePath, options.browserifyOptions, options.typescript)
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
     const bundler = browserify(browserifyOptions)
@@ -221,5 +251,13 @@ const preprocessor = (options = {}) => {
 
 // provide a clone of the default options
 preprocessor.defaultOptions = JSON.parse(JSON.stringify(defaultOptions))
+
+if (process.env.__TESTING__) {
+  preprocessor.reset = () => {
+    for (let filePath in bundles) {
+      delete bundles[filePath]
+    }
+  }
+}
 
 module.exports = preprocessor
