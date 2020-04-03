@@ -44,7 +44,9 @@ describe('typescript', function () {
   })
 
   it('handles .tsx file when the path is given', function () {
-    return bundle('math_spec.tsx', {
+    this.timeout(10000)
+
+    return bundle('enzyme_spec.tsx', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
       // check that bundled tests work
