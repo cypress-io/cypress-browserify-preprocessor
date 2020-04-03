@@ -2,7 +2,7 @@ const chai = require('chai')
 const path = require('path')
 const snapshot = require('snap-shot-it')
 
-const fs = require('../../fs')
+const fs = require('../../lib/fs')
 const preprocessor = require('../../index')
 
 /* eslint-disable-next-line no-unused-vars */

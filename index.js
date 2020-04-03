@@ -2,7 +2,7 @@
 
 const path = require('path')
 const Promise = require('bluebird')
-const fs = require('./fs')
+const fs = require('./lib/fs')
 
 const cloneDeep = require('lodash.clonedeep')
 const browserify = require('browserify')
@@ -95,7 +95,7 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath 
     browserifyOptions.transform = transform.filter(([name]) => !name.includes('babelify'))
     // add typescript compiler
     browserifyOptions.transform.push([
-      path.join(__dirname, './simple_tsify'), {
+      path.join(__dirname, './lib/simple_tsify'), {
         typescript: require(typescriptPath),
       },
     ])
