@@ -8,7 +8,7 @@ const preprocessor = require('../../index')
 /* eslint-disable-next-line no-unused-vars */
 const expect = chai.expect
 
-beforeEach(function () {
+beforeEach(() => {
   fs.removeSync(path.join(__dirname, '_test-output'))
 })
 
@@ -25,16 +25,16 @@ const bundle = (fixtureName, options = DEFAULT_OPTIONS) => {
   })
 }
 
-describe('browserify preprocessor - e2e', function () {
-  it('correctly preprocesses the file', function () {
+describe('browserify preprocessor - e2e', () => {
+  it('correctly preprocesses the file', () => {
     return bundle('example_spec.js').then((output) => {
       snapshot(output)
     })
   })
 })
 
-describe('typescript', function () {
-  it('handles .ts file when the path is given', function () {
+describe('typescript', () => {
+  it('handles .ts file when the path is given', () => {
     return bundle('typescript/math_spec.ts', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
@@ -43,7 +43,7 @@ describe('typescript', function () {
     })
   })
 
-  it('handles .tsx file when the path is given', function () {
+  it('handles .tsx file when the path is given', () => {
     return bundle('typescript/react_spec.tsx', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
@@ -70,8 +70,8 @@ describe('typescript', function () {
     })
   })
 
-  describe('throws errors when typescript path and tsify are given together', function () {
-    it('plugin', function () {
+  describe('throws errors when typescript path and tsify are given together', () => {
+    it('plugin', () => {
       expect(() => bundle('typescript/test1.ts', {
         browserifyOptions: {
           plugin: ['tsify'],
@@ -80,7 +80,7 @@ describe('typescript', function () {
       })).to.throw('Please only do one or the other.')
     })
 
-    it('transform', function () {
+    it('transform', () => {
       expect(() => bundle('typescript/test2.ts', {
         browserifyOptions: {
           transform: [
@@ -92,8 +92,8 @@ describe('typescript', function () {
     })
   })
 
-  describe('typescript transpile failure', function () {
-    it('cannot handle .ts file when the path is not given', function () {
+  describe('typescript transpile failure', () => {
+    it('cannot handle .ts file when the path is not given', () => {
       return bundle('typescript/test3.ts')
       .then(() => {
         expect(true).to.eq('should not be here')
@@ -103,7 +103,7 @@ describe('typescript', function () {
       })
     })
 
-    it('cannot handle .tsx file when the path is not given', function () {
+    it('cannot handle .tsx file when the path is not given', () => {
       return bundle('typescript/test4.tsx')
       .then(() => {
         expect(true).to.eq('should not be here')
