@@ -35,7 +35,7 @@ describe('browserify preprocessor - e2e', function () {
 
 describe('typescript', function () {
   it('handles .ts file when the path is given', function () {
-    return bundle('math_spec.ts', {
+    return bundle('typescript/math_spec.ts', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
       // check that bundled tests work
@@ -44,9 +44,11 @@ describe('typescript', function () {
   })
 
   it('handles .tsx file when the path is given', function () {
+    // This test loads many packages like react, enzyme.
+    // Because of that, we need more time.
     this.timeout(10000)
 
-    return bundle('enzyme_spec.tsx', {
+    return bundle('typescript/enzyme_spec.tsx', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
       // check that bundled tests work
@@ -57,7 +59,7 @@ describe('typescript', function () {
   it('babelify is removed even if it is not the last item', () => {
     const { browserifyOptions } = preprocessor.defaultOptions
 
-    return bundle('math_spec2.ts', {
+    return bundle('typescript/math_spec2.ts', {
       browserifyOptions: {
         ...browserifyOptions,
         transform: [
@@ -69,6 +71,50 @@ describe('typescript', function () {
     }).then((output) => {
       // check that bundled tests work
       eval(output)
+    })
+  })
+
+  describe('throws errors when typescript path and tsify are given together', function () {
+    it('plugin', function () {
+      expect(() => bundle('typescript/test1.ts', {
+        browserifyOptions: {
+          plugin: ['tsify'],
+        },
+        typescript: require.resolve('typescript'),
+      })).to.throw('Please only do one or the other.')
+    })
+
+    it('transform', function () {
+      expect(() => bundle('typescript/test2.ts', {
+        browserifyOptions: {
+          transform: [
+            ['path/to/tsify', {}],
+          ],
+        },
+        typescript: require.resolve('typescript'),
+      })).to.throw('Please only do one or the other.')
+    })
+  })
+
+  describe('typescript transpile failure', function () {
+    it('cannot handle .ts file when the path is not given', function () {
+      return bundle('typescript/test3.ts')
+      .then(() => {
+        expect(true).to.eq('should not be here')
+      })
+      .catch((err) => {
+        expect(err.message).to.include('\'import\' and \'export\' may appear only with \'sourceType: module\'')
+      })
+    })
+
+    it('cannot handle .tsx file when the path is not given', function () {
+      return bundle('typescript/test4.tsx')
+      .then(() => {
+        expect(true).to.eq('should not be here')
+      })
+      .catch((err) => {
+        expect(err.message).to.include('\'import\' and \'export\' may appear only with \'sourceType: module\'')
+      })
     })
   })
 })

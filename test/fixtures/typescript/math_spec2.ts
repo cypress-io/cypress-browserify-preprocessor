@@ -5,7 +5,7 @@ const { add } = math
 
 const x: number = 3
 
-context('math.ts', function () {
+context('math.ts 2', function () {
   it('imports function', () => {
     expect(add, 'add').to.be.a('function')
   })
