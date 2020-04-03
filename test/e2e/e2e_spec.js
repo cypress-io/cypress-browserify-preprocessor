@@ -55,7 +55,7 @@ describe('typescript', () => {
   it('babelify is removed even if it is not the last item', () => {
     const { browserifyOptions } = preprocessor.defaultOptions
 
-    return bundle('typescript/math_spec2.ts', {
+    return bundle('typescript/math_spec.ts', {
       browserifyOptions: {
         ...browserifyOptions,
         transform: [
