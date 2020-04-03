@@ -44,8 +44,6 @@
     "chokidar-cli": "1.2.2",
     "dependency-check": "3.3.0",
     "deps-ok": "1.4.1",
-    "enzyme": "3.11.0",
-    "enzyme-adapter-react-16": "1.15.2",
     "eslint": "5.13.0",
     "eslint-plugin-cypress-dev": "2.0.0",
     "eslint-plugin-mocha": "5.3.0",

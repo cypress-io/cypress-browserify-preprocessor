@@ -44,11 +44,7 @@ describe('typescript', function () {
   })
 
   it('handles .tsx file when the path is given', function () {
-    // This test loads many packages like react, enzyme.
-    // Because of that, we need more time.
-    this.timeout(10000)
-
-    return bundle('typescript/enzyme_spec.tsx', {
+    return bundle('typescript/react_spec.tsx', {
       typescript: require.resolve('typescript'),
     }).then((output) => {
       // check that bundled tests work
