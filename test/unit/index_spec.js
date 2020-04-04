@@ -15,6 +15,7 @@ const browserify = sandbox.stub()
 mockery.enable({
   warnOnUnregistered: false,
 })
+
 mockery.registerMock('browserify', browserify)
 
 const streamApi = {
@@ -47,6 +48,7 @@ describe('browserify preprocessor', function () {
     this.createWriteStreamApi = {
       on: sandbox.stub(),
     }
+
     sandbox.stub(fs, 'createWriteStream').returns(this.createWriteStreamApi)
     sandbox.stub(fs, 'ensureDirAsync').resolves()
 
