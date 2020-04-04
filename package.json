@@ -8,7 +8,8 @@
     "node": ">=6.5"
   },
   "files": [
-    "*.js"
+    "*.js",
+    "lib/*.js"
   ],
   "homepage": "https://github.com/cypress-io/cypress-browserify-preprocessor#readme",
   "keywords": [
