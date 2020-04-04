@@ -198,6 +198,7 @@ const preprocessor = (options = {}) => {
           debug('finished bundling:', outputPath)
           resolve(outputPath)
         })
+
         ws.on('error', onError)
 
         bundler
