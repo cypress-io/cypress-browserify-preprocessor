@@ -15,4 +15,9 @@ context('math.ts', function () {
   it('test ts-typed variable', function () {
     expect(x).to.eq(3)
   })
+  it('test iterator', () => {
+    const arr = [...Array(100).keys()]
+
+    expect(arr[0] + arr[1]).to.eq(1)
+  })
 })
