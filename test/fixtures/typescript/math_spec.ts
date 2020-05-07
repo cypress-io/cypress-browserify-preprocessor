@@ -5,6 +5,9 @@ const { add } = math
 
 const x: number = 3
 
+// ensures that generics can be properly compiled and not treated
+// as react components in `.ts` files.
+// https://github.com/cypress-io/cypress-browserify-preprocessor/issues/44
 const isKeyOf = <T>(obj: T, key: any): key is keyof T => {
   return typeof key === 'string' && key in obj;
 }
