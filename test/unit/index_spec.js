@@ -19,7 +19,9 @@ mockery.enable({
 mockery.registerMock('browserify', browserify)
 
 const streamApi = {
-  pipe () { return streamApi },
+  pipe () {
+    return streamApi
+  },
 }
 
 streamApi.on = sandbox.stub().returns(streamApi)
@@ -35,7 +37,9 @@ describe('browserify preprocessor', function () {
 
     const bundlerApi = this.bundlerApi = {
       bundle: sandbox.stub().returns(streamApi),
-      external () { return bundlerApi },
+      external () {
+        return bundlerApi
+      },
       close: sandbox.spy(),
       plugin: sandbox.stub(),
     }
