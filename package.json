@@ -40,13 +40,14 @@
     "semantic-release": "semantic-release"
   },
   "devDependencies": {
+    "@cypress/eslint-plugin-dev": "5.0.0",
     "ban-sensitive-files": "1.9.2",
     "chai": "4.2.0",
     "chokidar-cli": "1.2.2",
     "dependency-check": "3.3.0",
     "deps-ok": "1.4.1",
     "eslint": "6.8.0",
-    "eslint-plugin-cypress-dev": "3.0.2",
+    "eslint-plugin-json-format": "2.0.1",
     "eslint-plugin-mocha": "6.3.0",
     "husky": "4.2.3",
     "license-checker": "25.0.1",

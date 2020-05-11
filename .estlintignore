@@ -1,0 +1,2 @@
+# don't ignore hidden files, useful for formatting json config files
+!.*
