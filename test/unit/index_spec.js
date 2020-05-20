@@ -204,7 +204,7 @@ describe('browserify preprocessor', function () {
       })
 
       it('uses transforms if provided', function () {
-        const transform = [() => {}, {}]
+        const transform = [() => { }, {}]
 
         this.options.browserifyOptions = { transform }
 
@@ -334,7 +334,7 @@ describe('browserify preprocessor', function () {
         }
 
         this.run().then(() => {
-          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () {} })
+          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () { } })
           this.bundlerApi.on.withArgs('update').yield()
         })
       })
@@ -345,7 +345,7 @@ describe('browserify preprocessor', function () {
 
         return run(this.file)
         .then(() => {
-          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () {} })
+          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () { } })
           this.bundlerApi.on.withArgs('update').yield()
 
           return run(this.file)
