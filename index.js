@@ -60,7 +60,7 @@ const defaultOptions = {
   },
 }
 
-const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath = null) => {
+const getBrowserifyOptions = async (entry, userBrowserifyOptions = {}, typescriptPath = null) => {
   let browserifyOptions = cloneDeep(defaultOptions.browserifyOptions)
 
   // allow user to override default options
@@ -82,6 +82,16 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath 
   })
 
   if (typescriptPath) {
+    if (typeof typescriptPath !== 'string') {
+      throw new Error(`The 'typescript' option must be a string. You passed: ${typescriptPath}`)
+    }
+
+    const pathExists = await fs.pathExists(typescriptPath)
+
+    if (!pathExists) {
+      throw new Error(`The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: ${typescriptPath}`)
+    }
+
     const transform = browserifyOptions.transform
     const hasTsifyTransform = transform.some(([name]) => name.includes('tsify'))
     const hastsifyPlugin = browserifyOptions.plugin.includes('tsify')
@@ -135,7 +145,7 @@ const preprocessor = (options = {}) => {
   // when running in the GUI, it will likely get called multiple times
   // with the same filePath, as the user could re-run the tests, causing
   // the supported file and spec file to be requested again
-  return (file) => {
+  return async (file) => {
     const filePath = file.filePath
 
     debug('get:', filePath)
@@ -157,7 +167,7 @@ const preprocessor = (options = {}) => {
     debug('input:', filePath)
     debug('output:', outputPath)
 
-    const browserifyOptions = getBrowserifyOptions(filePath, options.browserifyOptions, options.typescript)
+    const browserifyOptions = await getBrowserifyOptions(filePath, options.browserifyOptions, options.typescript)
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
 
     const bundler = browserify(browserifyOptions)

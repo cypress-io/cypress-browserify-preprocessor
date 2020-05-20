@@ -424,23 +424,55 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      describe('when typescript path and tsify are given together', function () {
-        it('throws error when it is a plugin', function () {
+      describe('validation', function () {
+        const shouldntResolve = () => {
+          throw new Error('Should error, should not resolve')
+        }
+
+        it('throws error when typescript path is not a string', function () {
+          this.options.typescript = true
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            expect(err.message).to.equal(`The 'typescript' option must be a string. You passed: true`)
+          })
+        })
+
+        it('throws error when nothing exists at typescript path', function () {
+          this.options.typescript = '/nothing/here'
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            expect(err.message).to.equal(`The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: /nothing/here`)
+          })
+        })
+
+        it('throws error when typescript path and tsify plugin are specified', function () {
           this.options.browserifyOptions = {
             plugin: ['tsify'],
           }
 
-          expect(this.run).to.throw('This may cause conflicts')
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            expect(err.message).to.include('This may cause conflicts')
+          })
         })
 
-        it('throws error when it is a transform', function () {
+        it('throws error when typescript path and tsify transform are specified', function () {
           this.options.browserifyOptions = {
             transform: [
               ['path/to/tsify', {}],
             ],
           }
 
-          expect(this.run).to.throw('This may cause conflicts')
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            expect(err.message).to.include('This may cause conflicts')
+          })
         })
       })
     })
