@@ -1,6 +1,7 @@
 'use strict'
 
 const chai = require('chai')
+const fs = require('fs-extra')
 const mockery = require('mockery')
 const sinon = require('sinon')
 const watchify = require('watchify')
@@ -28,7 +29,6 @@ streamApi.on = sandbox.stub().returns(streamApi)
 
 process.env.__TESTING__ = true
 
-const fs = require('../../lib/fs')
 const preprocessor = require('../../index')
 
 describe('browserify preprocessor', function () {
@@ -54,7 +54,7 @@ describe('browserify preprocessor', function () {
     }
 
     sandbox.stub(fs, 'createWriteStream').returns(this.createWriteStreamApi)
-    sandbox.stub(fs, 'ensureDirAsync').resolves()
+    sandbox.stub(fs, 'ensureDir').resolves()
 
     this.options = {}
     this.file = {
@@ -215,7 +215,7 @@ describe('browserify preprocessor', function () {
 
       it('ensures directory for output is created', function () {
         return this.run().then(() => {
-          expect(fs.ensureDirAsync).to.be.calledWith('output')
+          expect(fs.ensureDir).to.be.calledWith('output')
         })
       })
 

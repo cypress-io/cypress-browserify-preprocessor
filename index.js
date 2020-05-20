@@ -2,7 +2,7 @@
 
 const path = require('path')
 const Promise = require('bluebird')
-const fs = require('./lib/fs')
+const fs = require('fs-extra')
 
 const cloneDeep = require('lodash.clonedeep')
 const browserify = require('browserify')
@@ -227,7 +227,7 @@ const preprocessor = (options = {}) => {
     })
 
     const bundlePromise = fs
-    .ensureDirAsync(path.dirname(outputPath))
+    .ensureDir(path.dirname(outputPath))
     .then(bundle)
 
     // cache the bundle promise, so it can be returned if this function

@@ -1,12 +1,12 @@
 const _ = require('lodash')
 const chai = require('chai')
+const fs = require('fs-extra')
 const path = require('path')
 const snapshot = require('snap-shot-it')
 const Bluebird = require('bluebird')
 
 process.env.__TESTING__ = true
 
-const fs = require('../../lib/fs')
 const preprocessor = require('../../index')
 
 /* eslint-disable-next-line no-unused-vars */
@@ -49,7 +49,7 @@ const verifySourceContents = ({ sources, sourcesContent }) => {
   const zippedArrays = _.zip(sources, sourcesContent)
 
   return Bluebird.map(zippedArrays, ([sourcePath, sourceContent]) => {
-    return fs.readFileAsync(sourcePath, 'utf8')
+    return fs.readFile(sourcePath, 'utf8')
     .then((str) => {
       expect(str).to.eq(sourceContent)
     })
