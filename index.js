@@ -10,6 +10,13 @@ const watchify = require('watchify')
 
 const debug = require('debug')('cypress:browserify')
 
+const typescriptExtensionRegex = /\.tsx?$/
+const errorTypes = {
+  TYPESCRIPT_AND_TSIFY: 'TYPESCRIPT_AND_TSIFY',
+  TYPESCRIPT_NONEXISTENT: 'TYPESCRIPT_NONEXISTENT',
+  TYPESCRIPT_NOT_STRING: 'TYPESCRIPT_NOT_STRING',
+}
+
 const bundles = {}
 
 // by default, we transform JavaScript (including some proposal features),
@@ -60,6 +67,16 @@ const defaultOptions = {
   },
 }
 
+const throwError = ({ message, type }) => {
+  const prefix = 'Error running @cypress/browserify-preprocessor:\n\n'
+
+  const err = new Error(`${prefix}${message}`)
+
+  if (type) err.type = type
+
+  throw err
+}
+
 const getBrowserifyOptions = async (entry, userBrowserifyOptions = {}, typescriptPath = null) => {
   let browserifyOptions = cloneDeep(defaultOptions.browserifyOptions)
 
@@ -83,13 +100,19 @@ const getBrowserifyOptions = async (entry, userBrowserifyOptions = {}, typescrip
 
   if (typescriptPath) {
     if (typeof typescriptPath !== 'string') {
-      throw new Error(`The 'typescript' option must be a string. You passed: ${typescriptPath}`)
+      throwError({
+        type: errorTypes.TYPESCRIPT_NOT_STRING,
+        message: `The 'typescript' option must be a string. You passed: ${typescriptPath}`,
+      })
     }
 
     const pathExists = await fs.pathExists(typescriptPath)
 
     if (!pathExists) {
-      throw new Error(`The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: ${typescriptPath}`)
+      throwError({
+        type: errorTypes.TYPESCRIPT_NONEXISTENT,
+        message: `The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: ${typescriptPath}`,
+      })
     }
 
     const transform = browserifyOptions.transform
@@ -99,15 +122,15 @@ const getBrowserifyOptions = async (entry, userBrowserifyOptions = {}, typescrip
     if (hasTsifyTransform || hastsifyPlugin) {
       const type = hasTsifyTransform ? 'transform' : 'plugin'
 
-      throw new Error(`Error running @cypress/browserify-preprocessor:
-
-It looks like you passed the 'typescript' option and also specified a browserify ${type} for TypeScript. This may cause conflicts.
+      throwError({
+        type: errorTypes.TYPESCRIPT_AND_TSIFY,
+        message: `It looks like you passed the 'typescript' option and also specified a browserify ${type} for TypeScript. This may cause conflicts.
 
 Please do one of the following:
 
 1) Pass in the 'typescript' option and omit the browserify ${type} (Recommmended)
-2) Omit the 'typescript' option and continue to use your own browserify ${type}
-`)
+2) Omit the 'typescript' option and continue to use your own browserify ${type}`,
+      })
     }
 
     browserifyOptions.extensions.push('.ts', '.tsx')
@@ -262,6 +285,8 @@ const preprocessor = (options = {}) => {
 
 // provide a clone of the default options
 preprocessor.defaultOptions = JSON.parse(JSON.stringify(defaultOptions))
+
+preprocessor.errorTypes = errorTypes
 
 if (process.env.__TESTING__) {
   preprocessor.reset = () => {

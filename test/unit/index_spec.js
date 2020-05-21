@@ -429,13 +429,19 @@ describe('browserify preprocessor', function () {
           throw new Error('Should error, should not resolve')
         }
 
+        const verifyErrorIncludesPrefix = (err) => {
+          expect(err.message).to.include('Error running @cypress/browserify-preprocessor:')
+        }
+
         it('throws error when typescript path is not a string', function () {
           this.options.typescript = true
 
           return this.run()
           .then(shouldntResolve)
           .catch((err) => {
-            expect(err.message).to.equal(`The 'typescript' option must be a string. You passed: true`)
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NOT_STRING)
+            expect(err.message).to.include(`The 'typescript' option must be a string. You passed: true`)
           })
         })
 
@@ -445,7 +451,9 @@ describe('browserify preprocessor', function () {
           return this.run()
           .then(shouldntResolve)
           .catch((err) => {
-            expect(err.message).to.equal(`The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: /nothing/here`)
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NONEXISTENT)
+            expect(err.message).to.include(`The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: /nothing/here`)
           })
         })
 
@@ -457,7 +465,9 @@ describe('browserify preprocessor', function () {
           return this.run()
           .then(shouldntResolve)
           .catch((err) => {
-            expect(err.message).to.include('This may cause conflicts')
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_AND_TSIFY)
+            expect(err.message).to.include(`It looks like you passed the 'typescript' option and also specified a browserify plugin for TypeScript. This may cause conflicts`)
           })
         })
 
@@ -471,7 +481,11 @@ describe('browserify preprocessor', function () {
           return this.run()
           .then(shouldntResolve)
           .catch((err) => {
-            expect(err.message).to.include('This may cause conflicts')
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_AND_TSIFY)
+            expect(err.message).to.include(`It looks like you passed the 'typescript' option and also specified a browserify transform for TypeScript. This may cause conflicts`)
+          })
+        })
           })
         })
       })
