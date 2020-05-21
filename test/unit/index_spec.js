@@ -1,6 +1,7 @@
 'use strict'
 
 const chai = require('chai')
+const fs = require('fs-extra')
 const mockery = require('mockery')
 const sinon = require('sinon')
 const watchify = require('watchify')
@@ -28,7 +29,6 @@ streamApi.on = sandbox.stub().returns(streamApi)
 
 process.env.__TESTING__ = true
 
-const fs = require('../../lib/fs')
 const preprocessor = require('../../index')
 
 describe('browserify preprocessor', function () {
@@ -54,7 +54,7 @@ describe('browserify preprocessor', function () {
     }
 
     sandbox.stub(fs, 'createWriteStream').returns(this.createWriteStreamApi)
-    sandbox.stub(fs, 'ensureDirAsync').resolves()
+    sandbox.stub(fs, 'ensureDir').resolves()
 
     this.options = {}
     this.file = {
@@ -204,7 +204,7 @@ describe('browserify preprocessor', function () {
       })
 
       it('uses transforms if provided', function () {
-        const transform = [() => {}, {}]
+        const transform = [() => { }, {}]
 
         this.options.browserifyOptions = { transform }
 
@@ -215,7 +215,7 @@ describe('browserify preprocessor', function () {
 
       it('ensures directory for output is created', function () {
         return this.run().then(() => {
-          expect(fs.ensureDirAsync).to.be.calledWith('output')
+          expect(fs.ensureDir).to.be.calledWith('output')
         })
       })
 
@@ -334,7 +334,7 @@ describe('browserify preprocessor', function () {
         }
 
         this.run().then(() => {
-          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () {} })
+          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () { } })
           this.bundlerApi.on.withArgs('update').yield()
         })
       })
@@ -345,7 +345,7 @@ describe('browserify preprocessor', function () {
 
         return run(this.file)
         .then(() => {
-          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () {} })
+          streamApi.on.withArgs('error').yieldsAsync(new Error('bundle error')).returns({ pipe () { } })
           this.bundlerApi.on.withArgs('update').yield()
 
           return run(this.file)
@@ -424,23 +424,95 @@ describe('browserify preprocessor', function () {
         })
       })
 
-      describe('when typescript path and tsify are given together', function () {
-        it('throws error when it is a plugin', function () {
+      describe('validation', function () {
+        const shouldntResolve = () => {
+          throw new Error('Should error, should not resolve')
+        }
+
+        const verifyErrorIncludesPrefix = (err) => {
+          expect(err.message).to.include('Error running @cypress/browserify-preprocessor:')
+        }
+
+        it('throws error when typescript path is not a string', function () {
+          this.options.typescript = true
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NOT_STRING)
+            expect(err.message).to.include(`The 'typescript' option must be a string. You passed: true`)
+          })
+        })
+
+        it('throws error when nothing exists at typescript path', function () {
+          this.options.typescript = '/nothing/here'
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NONEXISTENT)
+            expect(err.message).to.include(`The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: /nothing/here`)
+          })
+        })
+
+        it('throws error when typescript path and tsify plugin are specified', function () {
           this.options.browserifyOptions = {
             plugin: ['tsify'],
           }
 
-          expect(this.run).to.throw('This may cause conflicts')
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_AND_TSIFY)
+            expect(err.message).to.include(`It looks like you passed the 'typescript' option and also specified a browserify plugin for TypeScript. This may cause conflicts`)
+          })
         })
 
-        it('throws error when it is a transform', function () {
+        it('throws error when typescript path and tsify transform are specified', function () {
           this.options.browserifyOptions = {
             transform: [
               ['path/to/tsify', {}],
             ],
           }
 
-          expect(this.run).to.throw('This may cause conflicts')
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_AND_TSIFY)
+            expect(err.message).to.include(`It looks like you passed the 'typescript' option and also specified a browserify transform for TypeScript. This may cause conflicts`)
+          })
+        })
+
+        it('throws error when processing .ts file and typescript option is not set', function () {
+          this.options.typescript = undefined
+          this.file.filePath = 'path/to/file.ts'
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NOT_CONFIGURED)
+            expect(err.message).to.include(`You are attempting to preprocess a TypeScript file, but do not have TypeScript configured. Pass the 'typescript' option to enable TypeScript support`)
+            expect(err.message).to.include('path/to/file.ts')
+          })
+        })
+
+        it('throws error when processing .tsx file and typescript option is not set', function () {
+          this.options.typescript = undefined
+          this.file.filePath = 'path/to/file.tsx'
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NOT_CONFIGURED)
+            expect(err.message).to.include(`You are attempting to preprocess a TypeScript file, but do not have TypeScript configured. Pass the 'typescript' option to enable TypeScript support`)
+            expect(err.message).to.include('path/to/file.tsx')
+          })
         })
       })
     })

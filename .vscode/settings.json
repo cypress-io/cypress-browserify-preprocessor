@@ -1,6 +1,7 @@
 {
   "eslint.enable": true,
-  "editor.formatOnSave": true,
   // enable for eslint-plugin json-format
-  "eslint.validate": ["json"],
+  "eslint.validate": [
+    "json"
+  ],
 }

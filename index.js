@@ -2,13 +2,21 @@
 
 const path = require('path')
 const Promise = require('bluebird')
-const fs = require('./lib/fs')
+const fs = require('fs-extra')
 
 const cloneDeep = require('lodash.clonedeep')
 const browserify = require('browserify')
 const watchify = require('watchify')
 
 const debug = require('debug')('cypress:browserify')
+
+const typescriptExtensionRegex = /\.tsx?$/
+const errorTypes = {
+  TYPESCRIPT_AND_TSIFY: 'TYPESCRIPT_AND_TSIFY',
+  TYPESCRIPT_NONEXISTENT: 'TYPESCRIPT_NONEXISTENT',
+  TYPESCRIPT_NOT_CONFIGURED: 'TYPESCRIPT_NOT_CONFIGURED',
+  TYPESCRIPT_NOT_STRING: 'TYPESCRIPT_NOT_STRING',
+}
 
 const bundles = {}
 
@@ -60,7 +68,17 @@ const defaultOptions = {
   },
 }
 
-const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath = null) => {
+const throwError = ({ message, type }) => {
+  const prefix = 'Error running @cypress/browserify-preprocessor:\n\n'
+
+  const err = new Error(`${prefix}${message}`)
+
+  if (type) err.type = type
+
+  throw err
+}
+
+const getBrowserifyOptions = async (entry, userBrowserifyOptions = {}, typescriptPath = null) => {
   let browserifyOptions = cloneDeep(defaultOptions.browserifyOptions)
 
   // allow user to override default options
@@ -82,6 +100,22 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath 
   })
 
   if (typescriptPath) {
+    if (typeof typescriptPath !== 'string') {
+      throwError({
+        type: errorTypes.TYPESCRIPT_NOT_STRING,
+        message: `The 'typescript' option must be a string. You passed: ${typescriptPath}`,
+      })
+    }
+
+    const pathExists = await fs.pathExists(typescriptPath)
+
+    if (!pathExists) {
+      throwError({
+        type: errorTypes.TYPESCRIPT_NONEXISTENT,
+        message: `The 'typescript' option must be a valid path to your TypeScript installation. We could not find anything at the following path: ${typescriptPath}`,
+      })
+    }
+
     const transform = browserifyOptions.transform
     const hasTsifyTransform = transform.some(([name]) => name.includes('tsify'))
     const hastsifyPlugin = browserifyOptions.plugin.includes('tsify')
@@ -89,15 +123,15 @@ const getBrowserifyOptions = (entry, userBrowserifyOptions = {}, typescriptPath 
     if (hasTsifyTransform || hastsifyPlugin) {
       const type = hasTsifyTransform ? 'transform' : 'plugin'
 
-      throw new Error(`Error running @cypress/browserify-preprocessor:
-
-It looks like you passed the 'typescript' option and also specified a browserify ${type} for TypeScript. This may cause conflicts.
+      throwError({
+        type: errorTypes.TYPESCRIPT_AND_TSIFY,
+        message: `It looks like you passed the 'typescript' option and also specified a browserify ${type} for TypeScript. This may cause conflicts.
 
 Please do one of the following:
 
 1) Pass in the 'typescript' option and omit the browserify ${type} (Recommmended)
-2) Omit the 'typescript' option and continue to use your own browserify ${type}
-`)
+2) Omit the 'typescript' option and continue to use your own browserify ${type}`,
+      })
     }
 
     browserifyOptions.extensions.push('.ts', '.tsx')
@@ -135,7 +169,7 @@ const preprocessor = (options = {}) => {
   // when running in the GUI, it will likely get called multiple times
   // with the same filePath, as the user could re-run the tests, causing
   // the supported file and spec file to be requested again
-  return (file) => {
+  return async (file) => {
     const filePath = file.filePath
 
     debug('get:', filePath)
@@ -157,8 +191,17 @@ const preprocessor = (options = {}) => {
     debug('input:', filePath)
     debug('output:', outputPath)
 
-    const browserifyOptions = getBrowserifyOptions(filePath, options.browserifyOptions, options.typescript)
+    const browserifyOptions = await getBrowserifyOptions(filePath, options.browserifyOptions, options.typescript)
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
+
+    if (!options.typescript && typescriptExtensionRegex.test(filePath)) {
+      throwError({
+        type: errorTypes.TYPESCRIPT_NOT_CONFIGURED,
+        message: `You are attempting to preprocess a TypeScript file, but do not have TypeScript configured. Pass the 'typescript' option to enable TypeScript support.
+
+The file: ${filePath}`,
+      })
+    }
 
     const bundler = browserify(browserifyOptions)
 
@@ -227,7 +270,7 @@ const preprocessor = (options = {}) => {
     })
 
     const bundlePromise = fs
-    .ensureDirAsync(path.dirname(outputPath))
+    .ensureDir(path.dirname(outputPath))
     .then(bundle)
 
     // cache the bundle promise, so it can be returned if this function
@@ -252,6 +295,8 @@ const preprocessor = (options = {}) => {
 
 // provide a clone of the default options
 preprocessor.defaultOptions = JSON.parse(JSON.stringify(defaultOptions))
+
+preprocessor.errorTypes = errorTypes
 
 if (process.env.__TESTING__) {
   preprocessor.reset = () => {
