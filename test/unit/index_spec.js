@@ -486,6 +486,32 @@ describe('browserify preprocessor', function () {
             expect(err.message).to.include(`It looks like you passed the 'typescript' option and also specified a browserify transform for TypeScript. This may cause conflicts`)
           })
         })
+
+        it('throws error when processing .ts file and typescript option is not set', function () {
+          this.options.typescript = undefined
+          this.file.filePath = 'path/to/file.ts'
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NOT_CONFIGURED)
+            expect(err.message).to.include(`You are attempting to preprocess a TypeScript file, but do not have TypeScript configured. Pass the 'typescript' option to enable TypeScript support`)
+            expect(err.message).to.include('path/to/file.ts')
+          })
+        })
+
+        it('throws error when processing .tsx file and typescript option is not set', function () {
+          this.options.typescript = undefined
+          this.file.filePath = 'path/to/file.tsx'
+
+          return this.run()
+          .then(shouldntResolve)
+          .catch((err) => {
+            verifyErrorIncludesPrefix(err)
+            expect(err.type).to.equal(preprocessor.errorTypes.TYPESCRIPT_NOT_CONFIGURED)
+            expect(err.message).to.include(`You are attempting to preprocess a TypeScript file, but do not have TypeScript configured. Pass the 'typescript' option to enable TypeScript support`)
+            expect(err.message).to.include('path/to/file.tsx')
           })
         })
       })

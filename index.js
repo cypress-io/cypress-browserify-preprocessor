@@ -14,6 +14,7 @@ const typescriptExtensionRegex = /\.tsx?$/
 const errorTypes = {
   TYPESCRIPT_AND_TSIFY: 'TYPESCRIPT_AND_TSIFY',
   TYPESCRIPT_NONEXISTENT: 'TYPESCRIPT_NONEXISTENT',
+  TYPESCRIPT_NOT_CONFIGURED: 'TYPESCRIPT_NOT_CONFIGURED',
   TYPESCRIPT_NOT_STRING: 'TYPESCRIPT_NOT_STRING',
 }
 
@@ -192,6 +193,15 @@ const preprocessor = (options = {}) => {
 
     const browserifyOptions = await getBrowserifyOptions(filePath, options.browserifyOptions, options.typescript)
     const watchifyOptions = Object.assign({}, defaultOptions.watchifyOptions, options.watchifyOptions)
+
+    if (!options.typescript && typescriptExtensionRegex.test(filePath)) {
+      throwError({
+        type: errorTypes.TYPESCRIPT_NOT_CONFIGURED,
+        message: `You are attempting to preprocess a TypeScript file, but do not have TypeScript configured. Pass the 'typescript' option to enable TypeScript support.
+
+The file: ${filePath}`,
+      })
+    }
 
     const bundler = browserify(browserifyOptions)
 
