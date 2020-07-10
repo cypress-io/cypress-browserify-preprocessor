@@ -117,7 +117,7 @@ const getBrowserifyOptions = async (entry, userBrowserifyOptions = {}, typescrip
     }
 
     const transform = browserifyOptions.transform
-    const hasTsifyTransform = transform.some(([name]) => name.includes('tsify'))
+    const hasTsifyTransform = transform.some((stage) => Array.isArray(stage) && stage[0].includes('tsify'))
     const hastsifyPlugin = browserifyOptions.plugin.includes('tsify')
 
     if (hasTsifyTransform || hastsifyPlugin) {
@@ -136,7 +136,7 @@ Please do one of the following:
 
     browserifyOptions.extensions.push('.ts', '.tsx')
     // remove babelify setting
-    browserifyOptions.transform = transform.filter(([name]) => !name.includes('babelify'))
+    browserifyOptions.transform = transform.filter((stage) => !Array.isArray(stage) || !stage[0].includes('babelify'))
     // add typescript compiler
     browserifyOptions.transform.push([
       path.join(__dirname, './lib/simple_tsify'), {

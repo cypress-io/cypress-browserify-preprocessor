@@ -380,6 +380,21 @@ describe('browserify preprocessor', function () {
         })
       })
 
+      // Regression test for cypress-io/cypress-browserify-preprocessor#56
+      it('handles transforms defined as functions', function () {
+        this.createWriteStreamApi.on.withArgs('finish').yields()
+
+        const transform = [() => { }, {}]
+
+        this.options.browserifyOptions = { transform }
+
+        return this.run().then(() => {
+          transform.forEach((stage, stageIndex) => {
+            expect(browserify.lastCall.args[0].transform[stageIndex]).to.eql(stage)
+          })
+        })
+      })
+
       it('removes babelify transform', function () {
         this.createWriteStreamApi.on.withArgs('finish').yields()
 
