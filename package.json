@@ -39,7 +39,7 @@
     "watchify": "3.11.1"
   },
   "devDependencies": {
-    "@cypress/eslint-plugin-dev": "5.0.0",
+    "@cypress/eslint-plugin-dev": "5.0.2",
     "ban-sensitive-files": "1.9.2",
     "chai": "4.2.0",
     "chokidar-cli": "2.1.0",
