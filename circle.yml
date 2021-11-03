@@ -1,16 +1,16 @@
 # https://circleci.com/orbs/registry/orb/circleci/node
 jobs:
   build:
-    executor:
-      name: node/default
-      tag: '12'
+    executor: node/default
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: npm ci
-      - run: npm run test
-      - run: npm run semantic-release || true
+      - node/install-packages
+      - run:
+          name: Run Tests
+          command: npm run test
+      - run:
+          name: Semantic Release
+          command: npm run semantic-release || true
 orbs:
-  node: circleci/node@1.1
+  node: circleci/node@4.7.0
 version: 2.1
