@@ -6,7 +6,7 @@ jobs:
       - checkout
       - run:
           name: Environment Details
-          command: "echo 'Node.js version: $(node -v)\n' && echo 'npm version: $(npm -v)"
+          command: "echo 'Node.js version: $(node -v)\n' && echo 'npm version: $(npm -v)'"
       - node/install-packages
       - run:
           name: Run Tests
