@@ -1,9 +1,7 @@
 # https://circleci.com/orbs/registry/orb/circleci/node
 jobs:
   build:
-    executor:
-      name: node/default
-      tag: '12'
+    executor: node/default
     steps:
       - checkout
       - node/install-packages
