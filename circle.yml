@@ -1,7 +1,11 @@
 # https://circleci.com/orbs/registry/orb/circleci/node
+version: 2.1
+orbs:
+  node: circleci/node@4.7.0
 jobs:
   build:
-    executor: node/default
+    docker:
+      - image: cimg/node:14.18.1
     steps:
       - checkout
       - run:
@@ -11,12 +15,10 @@ jobs:
             node --version
             echo "npm version"
             npm --version
+      - node/install-packages
       - run:
           name: Run Tests
           command: npm run test
       - run:
           name: Semantic Release
           command: npm run semantic-release || true
-orbs:
-  node: circleci/node@4.7.0
-version: 2.1
