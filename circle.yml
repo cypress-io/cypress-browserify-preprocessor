@@ -6,11 +6,13 @@ jobs:
       tag: '16'
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: npm ci
-      - run: npm run test
-      - run: npm run semantic-release || true
+      - node/install-packages
+      - run:
+          name: Run Tests
+          command: npm run test
+      - run:
+          name: Semantic Release
+          command: npm run semantic-release || true
 orbs:
   node: circleci/node@4.7.0
 version: 2.1
