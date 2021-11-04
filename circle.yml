@@ -8,9 +8,7 @@ jobs:
       - image: cimg/node:14.18.1
     steps:
       - checkout
-      - run:
-          name: Upgrade npm
-          command: npm i -g npm
+      - node/install
       - run:
           name: Environment Details
           command: |
