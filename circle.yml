@@ -9,6 +9,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Upgrade npm
+          command: npm i -g npm
+      - run:
           name: Environment Details
           command: |
             echo "Node.js version"
