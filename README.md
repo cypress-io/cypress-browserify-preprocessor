@@ -18,7 +18,7 @@ npm install --save-dev @cypress/browserify-preprocessor
 
 ## Usage
 
-### Note: This Plugin only works for Cypress < 10
+### Note: This Plugin only works for Cypress < 9
 
 In your project's [plugins file](https://on.cypress.io/plugins-guide):
 
