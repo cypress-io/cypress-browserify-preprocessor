@@ -1,3 +1,5 @@
+## Note: This plugin is deprecated and Cypress will not be moving forward with development of the plugin.
+
 # Cypress Browserify Preprocessor [![CircleCI](https://circleci.com/gh/cypress-io/cypress-browserify-preprocessor/tree/master.svg?style=svg)](https://circleci.com/gh/cypress-io/cypress-browserify-preprocessor/tree/master)
 
 Cypress preprocessor for bundling JavaScript via browserify.
